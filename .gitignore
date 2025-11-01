@@ -1,0 +1,8 @@
+# cmake build files
+CMakeUserPresets.json
+
+# ignore test data
+data/
+
+# build folders
+build/

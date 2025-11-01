@@ -1,0 +1,46 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "msvc",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build/msvc",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_TARGET_TRIPLET": "x64-windows"
+            }
+        },
+        {
+            "name": "mingw",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/mingw",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_TARGET_TRIPLET": "x64-mingw-static"
+            }
+        },
+        {
+            "name": "clang",
+            "generator": "Ninja", 
+            "binaryDir": "${sourceDir}/build/clang",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_TARGET_TRIPLET": "x64-windows-static-clang"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "msvc",
+            "configurePreset": "msvc"
+        },
+        {
+            "name": "mingw", 
+            "configurePreset": "mingw"
+        },
+        {
+            "name": "clang",
+            "configurePreset": "clang"
+        }
+    ]
+}   
