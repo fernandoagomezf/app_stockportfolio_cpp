@@ -1,0 +1,2 @@
+export module spt.domain;
+

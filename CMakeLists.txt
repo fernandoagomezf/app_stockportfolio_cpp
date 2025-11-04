@@ -17,6 +17,10 @@ find_package(wxWidgets REQUIRED COMPONENTS core base OPTIONAL_COMPONENTS net gl)
 include(${wxWidgets_USE_FILE})
 
 add_executable(spt WIN32
+    # domain module
+    src/spt.domain/spt.domain.ixx
+    # infrastructure module
+    src/spt.infrastructure/spt.infrastructure.ixx
     # application module
     src/spt.app/application.ixx
     src/spt.app/application.cpp
