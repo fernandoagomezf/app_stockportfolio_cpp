@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 4.1.0)
 
 project(spt
     VERSION 0.1.0
-    DESCRIPTION "Stock Portfolio Tracker"
+    DESCRIPTION "Stock Portfolio Monitor"
     LANGUAGES CXX
 )
 
@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 set(wxWidgets_USE_STATIC ON)
 
+find_package(SQLite3 REQUIRED)
 find_package(wxWidgets REQUIRED COMPONENTS core base OPTIONAL_COMPONENTS net gl)
 
 include(${wxWidgets_USE_FILE})
@@ -21,11 +22,14 @@ add_executable(spt WIN32
     src/spt.domain/spt.domain.ixx
     # infrastructure module
     src/spt.infrastructure/spt.infrastructure.ixx
+    src/spt.infrastructure/database.ixx
+    src/spt.infrastructure/database.cpp
     # application module
     src/spt.app/application.ixx
     src/spt.app/application.cpp
     src/spt.app/window.ixx
     src/spt.app/window.cpp
 )
+target_link_libraries(spt PRIVATE SQLite::SQLite3)
 target_link_libraries(spt PRIVATE ${wxWidgets_LIBRARIES})
 target_compile_features(spt PUBLIC cxx_std_23)
