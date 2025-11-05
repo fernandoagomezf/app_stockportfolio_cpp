@@ -28,6 +28,8 @@ add_executable(spt WIN32
     src/spt.infrastructure.sql/row.cpp
     src/spt.infrastructure.sql/resultset.ixx
     src/spt.infrastructure.sql/resultset.cpp
+    src/spt.infrastructure.sql/statement.ixx
+    src/spt.infrastructure.sql/statement.cpp
     # application module
     src/spt.app/application.ixx
     src/spt.app/application.cpp
