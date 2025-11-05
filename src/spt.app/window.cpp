@@ -15,8 +15,7 @@ import :window;
 using spt::Window;
 
 Window::Window()
-    : wxFrame(nullptr, wxID_ANY, "Stock Portfolio Tracker v0.1")
+    : wxFrame(nullptr, wxID_ANY, "Stock Portfolio Tracker")
 {
-    SetSize({ 1200, 700 });
-    Center();
+    Maximize();
 }

@@ -32,6 +32,9 @@ add_executable(spt WIN32
     src/spt.infrastructure.sql/statement.cpp
     src/spt.infrastructure.sql/database.ixx
     src/spt.infrastructure.sql/database.cpp
+    src/spt.infrastructure.repositories/spt.infrastructure.repositories.ixx
+    src/spt.infrastructure.repositories/repository.ixx
+    src/spt.infrastructure.repositories/repository.cpp
     # application module
     src/spt.app/application.ixx
     src/spt.app/application.cpp
