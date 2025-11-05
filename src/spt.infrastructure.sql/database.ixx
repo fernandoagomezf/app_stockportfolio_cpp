@@ -30,7 +30,7 @@ namespace spt::infrastructure::sql   {
             void execute(string_view sql);
             void execute(string_view sql, initializer_list<Value> params);
             ResultSet query(string_view sql);
-            ResultSet query(string_view sql, initializer_list<Value> params);            
+            ResultSet query(string_view sql, initializer_list<Value> params);
 
         private:
             struct Deleter {

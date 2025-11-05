@@ -14,15 +14,10 @@ using std::format;
 using std::initializer_list;
 using std::invalid_argument;
 using std::logic_error;
-using std::make_unique;
-using std::monostate;
 using std::runtime_error;
 using std::string;
 using std::string_view;
-using std::unique_ptr;
-using std::unordered_map;
-using std::vector;
-using std::visit;
+using std::vector; 
 using spt::infrastructure::sql::Database;
 using spt::infrastructure::sql::Statement;
 using spt::infrastructure::sql::Value;
@@ -32,6 +27,7 @@ using spt::infrastructure::sql::ResultSet;
 Database::Database(string_view name) 
     : _isInTransaction { false }
 {
+
     sqlite3* db { nullptr };
     int rc = sqlite3_open_v2(name.data(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, nullptr);
     if (rc != SQLITE_OK) {
