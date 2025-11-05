@@ -10,6 +10,10 @@ import :statement;
 import :value;
 import :row;
 
+using std::filesystem::create_directories;
+using std::filesystem::exists;
+using std::filesystem::filesystem_error;
+using std::filesystem::path;
 using std::format;
 using std::initializer_list;
 using std::invalid_argument;
@@ -126,4 +130,17 @@ ResultSet Database::query(string_view sql, initializer_list<Value> paramsList) {
     return stmt.executeQuery();
 }
 
-
+void Database::ensure(string_view dbName) {
+    try {
+        path filePath { dbName };
+        path parent { filePath.parent_path() };
+        if (!exists(parent)) {
+            create_directories(parent);
+        }
+        Database db { dbName };
+    } catch (const filesystem_error& ex) {
+        throw invalid_argument {
+            format("Couldn't ensure the file {0}: {1}", dbName, ex.what())
+        };
+    }
+}

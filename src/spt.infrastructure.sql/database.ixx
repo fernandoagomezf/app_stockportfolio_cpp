@@ -32,6 +32,8 @@ namespace spt::infrastructure::sql   {
             ResultSet query(string_view sql);
             ResultSet query(string_view sql, initializer_list<Value> params);
 
+            static void ensure(string_view dbName);
+
         private:
             struct Deleter {
                 void operator()(sqlite3* db) const;
