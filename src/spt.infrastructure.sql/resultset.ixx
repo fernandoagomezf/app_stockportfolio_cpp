@@ -12,8 +12,6 @@ namespace spt::infrastructure::sql {
         public:
             using const_iterator = vector<Row>::const_iterator;
 
-            ResultSet(size_t count);
-
             size_t count() const;
             void add(Row row);
             void clear();
