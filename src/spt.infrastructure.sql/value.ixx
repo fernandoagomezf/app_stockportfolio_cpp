@@ -11,16 +11,22 @@ namespace spt::infrastructure::sql {
         public:
             Value();
             Value(int value);
-            Value(long v);
+            Value(long long v);
             Value(double v);
             Value(string v);
 
+            bool isNull() const;
+            bool isInt() const;
+            bool isLong() const;
+            bool isDouble() const;
+            bool isString() const;
+
             int getInt() const;
-            int getLong() const;
-            int getDouble() const;
+            long long getLong() const;
+            double getDouble() const;
             string getString() const;
             
         private:
-            variant<monostate, int, long, double, string> _value;
+            variant<monostate, int, long long, double, string> _value;
     };
 }

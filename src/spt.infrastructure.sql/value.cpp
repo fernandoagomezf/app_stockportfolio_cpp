@@ -4,6 +4,7 @@ import std;
 import :value;
 
 using std::get;
+using std::holds_alternative;
 using std::monostate;
 using std::string;
 using spt::infrastructure::sql::Value;
@@ -18,7 +19,7 @@ Value::Value(int value)
 {
 }
 
-Value::Value(long value) 
+Value::Value(long long value) 
     : _value(value) 
 {
 }
@@ -33,15 +34,35 @@ Value::Value(string value)
 {
 }
 
+bool Value::isNull() const {
+    return holds_alternative<monostate>(_value);
+}
+
+bool Value::isInt() const {
+    return holds_alternative<int>(_value);
+}
+
+bool Value::isLong() const {
+    return holds_alternative<long long>(_value);
+}
+
+bool Value::isDouble() const {
+    return holds_alternative<double>(_value);
+}
+
+bool Value::isString() const {
+    return holds_alternative<string>(_value);
+}
+
 int Value::getInt() const {
     return get<int>(_value);
 }
 
-int Value::getLong() const {
-    return get<long>(_value);
+long long Value::getLong() const {
+    return get<long long>(_value);
 }
 
-int Value::getDouble() const {
+double Value::getDouble() const {
     return get<double>(_value);
 }
 
