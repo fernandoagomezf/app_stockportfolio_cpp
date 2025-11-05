@@ -4,6 +4,7 @@ import std;
 import :value;
 import :row;
 
+using std::format;
 using std::map;
 using std::out_of_range;
 using std::size_t;
@@ -24,7 +25,9 @@ bool Row::contains(string name) const {
 Value Row::get(string name) const {
     auto it = _columns.find(string{name});
     if (it == _columns.end()) {
-        throw out_of_range("Column not found: " + string{name});
+        throw out_of_range {
+            format("Column not found: {0}", string{name})
+        };
     }
     return it->second;
 }
