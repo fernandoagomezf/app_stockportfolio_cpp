@@ -21,9 +21,13 @@ add_executable(spt WIN32
     # domain module
     src/spt.domain/spt.domain.ixx
     # infrastructure module
-    src/spt.infrastructure/spt.infrastructure.ixx
-    src/spt.infrastructure/database.ixx
-    src/spt.infrastructure/database.cpp
+    src/spt.infrastructure.sql/spt.infrastructure.sql.ixx
+    src/spt.infrastructure.sql/value.ixx
+    src/spt.infrastructure.sql/value.cpp
+    src/spt.infrastructure.sql/row.ixx
+    src/spt.infrastructure.sql/row.cpp
+    src/spt.infrastructure.sql/resultset.ixx
+    src/spt.infrastructure.sql/resultset.cpp
     # application module
     src/spt.app/application.ixx
     src/spt.app/application.cpp
