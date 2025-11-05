@@ -13,9 +13,9 @@ namespace spt::infrastructure::sql {
     export class Row {
         public:
             size_t count() const;
-            bool contains(string name) const;
-            Value get(string name) const;
-            void set(string name, Value value);
+            bool contains(string_view name) const;
+            const Value& get(string_view name) const;
+            void set(const string& name, Value value);
 
         private:
             map<string, Value> _columns;

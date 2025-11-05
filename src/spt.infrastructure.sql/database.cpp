@@ -2,46 +2,49 @@ module;
 
 #include <sqlite3.h>
 
-module spt.infrastructure:database;
+module spt.infrastructure.sql:database;
 
 import std;
 import :database;
 import :statement;
+import :value;
+import :row;
 
-using std::expected;
 using std::format;
 using std::initializer_list;
 using std::invalid_argument;
+using std::logic_error;
 using std::make_unique;
 using std::monostate;
 using std::runtime_error;
 using std::string;
 using std::string_view;
-using std::unexpected;
 using std::unique_ptr;
 using std::unordered_map;
 using std::vector;
 using std::visit;
-using spt::infrastructure::Database;
-using spt::infrastructure::Statement;
-using spt::infrastructure::Value;
-using spt::infrastructure::Row;
-using spt::infrastructure::ResultSet;
+using spt::infrastructure::sql::Database;
+using spt::infrastructure::sql::Statement;
+using spt::infrastructure::sql::Value;
+using spt::infrastructure::sql::Row;
+using spt::infrastructure::sql::ResultSet;
 
 Database::Database(string_view name) 
-    : _inTransaction { false }
+    : _isInTransaction { false }
 {
     sqlite3* db { nullptr };
     int rc = sqlite3_open_v2(name.data(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, nullptr);
     if (rc != SQLITE_OK) {
         auto err = sqlite3_errmsg(db);
-        throw invalid_argument { format("Failed to open database: {0}", err) };
+        throw invalid_argument { 
+            format("Failed to open database: {0}", err) 
+        };
     }
     _db.reset(db);
 }
 
 Database::~Database() {
-    if (_inTransaction) {
+    if (_isInTransaction) {
         try {
             rollback();
         } catch (...) {
@@ -61,18 +64,26 @@ Statement Database::prepare(string_view sql) {
 }
 
 void Database::begin() {
+    if (_isInTransaction) {
+        throw logic_error { "Transaction already in progress" };
+    }
     execute("BEGIN TRANSACTION");
-    _inTransaction = true;
+    _isInTransaction = true;
 }
 
 void Database::commit() {
+    if (!_isInTransaction) {
+        throw logic_error { "No transaction in progress" };
+    }
     execute("COMMIT");
-    _inTransaction = false;
+    _isInTransaction = false;
 }
 
 void Database::rollback() {
-    execute("ROLLBACK");
-    _inTransaction = false;
+    if (_isInTransaction) {
+        execute("ROLLBACK");
+        _isInTransaction = false;
+    }
 }
 
 void Database::execute(string_view sql) {
@@ -91,11 +102,11 @@ void Database::execute(string_view sql) {
 void Database::execute(string_view sql, initializer_list<Value> paramsList) {
     vector<Value> params { paramsList };
     Statement stmt { prepare(sql) };
-    int idx { 0 }
+    int idx { 0 };
 
-    for (auto param; : params) {
-        stmt.bind(idx, param);
+    for (const auto& param : params) {
         ++idx;
+        stmt.bind(idx, param);
     }
 
     stmt.execute();
@@ -106,14 +117,14 @@ ResultSet Database::query(string_view sql) {
     return stmt.executeQuery();
 }
 
-ResultSet Database::query(string_view sql, initializer_list<SqlValue> paramsList) {
-    vector<SqlValue> params { paramsList };
+ResultSet Database::query(string_view sql, initializer_list<Value> paramsList) {
+    vector<Value> params { paramsList };
     Statement stmt { prepare(sql) };
     int idx { 0 };
 
-    for (auto param : params) {
-        stmt.bind(idx, param);
+    for (const auto& param : params) {
         ++idx;
+        stmt.bind(idx, param);
     }
 
     return stmt.executeQuery();

@@ -30,8 +30,8 @@ namespace spt::infrastructure::sql {
             int getInt() const;
             long long getLong() const;
             double getDouble() const;
-            string getString() const;
-            blob getBlob() const;
+            const string& getString() const;
+            const blob& getBlob() const;
             
         private:
             variant<monostate, int, long long, double, string, blob> _value;

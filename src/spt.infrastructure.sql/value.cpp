@@ -75,10 +75,10 @@ double Value::getDouble() const {
     return get<double>(_value);
 }
 
-string Value::getString() const {
+const string& Value::getString() const {
     return get<string>(_value);
 }
 
-Value::blob Value::getBlob() const {
+const Value::blob& Value::getBlob() const {
     return get<blob>(_value);
 }

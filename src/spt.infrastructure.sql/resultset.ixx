@@ -8,7 +8,7 @@ namespace spt::infrastructure::sql {
     using std::vector;
     using spt::infrastructure::sql::Row;
 
-    class ResultSet {
+    export class ResultSet {
         public:
             using const_iterator = vector<Row>::const_iterator;
 

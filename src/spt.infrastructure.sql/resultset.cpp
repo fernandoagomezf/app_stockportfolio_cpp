@@ -4,6 +4,7 @@ import std;
 import :row;
 import :resultset;
 
+using std::move;
 using std::size_t;
 using spt::infrastructure::sql::Row;
 using spt::infrastructure::sql::ResultSet;
@@ -13,7 +14,7 @@ size_t ResultSet::count() const {
 }
 
 void ResultSet::add(Row row) {
-    _rows.push_back(row);
+    _rows.push_back(move(row));
 }
 
 void ResultSet::clear() {

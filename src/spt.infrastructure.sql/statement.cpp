@@ -66,11 +66,11 @@ void Statement::bind(int index, string_view value) {
     sqlite3_bind_text(_stmt.get(), index, value.data(), static_cast<int>(value.size()), SQLITE_TRANSIENT);
 }
 
-void Statement::bind(int index, vector<byte> value) {
+void Statement::bind(int index, const vector<byte>& value) {
     sqlite3_bind_blob(_stmt.get(), index, value.data(), static_cast<int>(value.size()), SQLITE_TRANSIENT);
 }
 
-void Statement::bind(int index, Value value) {
+void Statement::bind(int index, const Value& value) {
     if (value.isNull()) {
         bind(index, nullptr);
     } else if (value.isInt()) {
@@ -146,6 +146,9 @@ ResultSet Statement::executeQuery() {
                     }
                     break;
                 }
+                case SQLITE_NULL:
+                    value = {};
+                    break;
             }
             
             row.set(columnName, move(value));

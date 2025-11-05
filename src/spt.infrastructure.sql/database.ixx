@@ -1,10 +1,11 @@
-export module spt.infrastructure.sqlite:database;
+export module spt.infrastructure.sql:database;
 
 import <sqlite3.h>;
 import std;
 import :statement;
 
 namespace spt::infrastructure::sql   {
+    using std::initializer_list;
     using std::string;
     using std::string_view;
     using std::unique_ptr;
@@ -29,7 +30,7 @@ namespace spt::infrastructure::sql   {
             void execute(string_view sql);
             void execute(string_view sql, initializer_list<Value> params);
             ResultSet query(string_view sql);
-            ResultSet query(string_view sql, initializer_list<SqlValue> params);            
+            ResultSet query(string_view sql, initializer_list<Value> params);            
 
         private:
             struct Deleter {

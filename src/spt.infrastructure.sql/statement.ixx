@@ -1,6 +1,5 @@
 export module spt.infrastructure.sql:statement;
 
-
 import std;
 import :value;
 import :resultset;
@@ -29,8 +28,8 @@ namespace spt::infrastructure::sql {
             void bind(int index, long long value);
             void bind(int index, double value);
             void bind(int index, string_view value);
-            void bind(int index, vector<byte> value);
-            void bind(int index, Value value);
+            void bind(int index, const vector<byte>& value);
+            void bind(int index, const Value& value);
             
             void execute();
             ResultSet executeQuery();
