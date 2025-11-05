@@ -34,6 +34,11 @@ Value::Value(string value)
 {
 }
 
+Value::Value(Value::blob value)
+    : _value(value)
+{
+}
+
 bool Value::isNull() const {
     return holds_alternative<monostate>(_value);
 }
@@ -54,6 +59,10 @@ bool Value::isString() const {
     return holds_alternative<string>(_value);
 }
 
+bool Value::isBlob() const {
+    return holds_alternative<blob>(_value);
+}
+
 int Value::getInt() const {
     return get<int>(_value);
 }
@@ -68,4 +77,8 @@ double Value::getDouble() const {
 
 string Value::getString() const {
     return get<string>(_value);
+}
+
+Value::blob Value::getBlob() const {
+    return get<blob>(_value);
 }
