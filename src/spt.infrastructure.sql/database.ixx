@@ -5,6 +5,7 @@ import std;
 import :statement;
 
 namespace spt::infrastructure::sql   {
+    using std::filesystem::path;
     using std::initializer_list;
     using std::string;
     using std::string_view;
@@ -32,12 +33,12 @@ namespace spt::infrastructure::sql   {
             ResultSet query(string_view sql);
             ResultSet query(string_view sql, initializer_list<Value> params);
 
-            static void ensure(string_view dbName);
-
         private:
             struct Deleter {
                 void operator()(sqlite3* db) const;
             };
+
+            static void init(string_view name);
 
             unique_ptr<sqlite3, Deleter> _db;
             bool _isInTransaction;

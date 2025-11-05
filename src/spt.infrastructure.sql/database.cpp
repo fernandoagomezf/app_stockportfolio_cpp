@@ -15,6 +15,7 @@ using std::filesystem::exists;
 using std::filesystem::filesystem_error;
 using std::filesystem::path;
 using std::format;
+using std::getenv;
 using std::initializer_list;
 using std::invalid_argument;
 using std::logic_error;
@@ -31,7 +32,7 @@ using spt::infrastructure::sql::ResultSet;
 Database::Database(string_view name) 
     : _isInTransaction { false }
 {
-
+    init(name);
     sqlite3* db { nullptr };
     int rc = sqlite3_open_v2(name.data(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, nullptr);
     if (rc != SQLITE_OK) {
@@ -56,6 +57,15 @@ Database::~Database() {
 void Database::Deleter::operator()(sqlite3* db) const {
     if (db != nullptr) {
         sqlite3_close_v2(db);
+    }
+}
+
+
+void Database::init(string_view name) {    
+    path file { name };
+    path dir { file.parent_path() };
+    if (!exists(dir)) {
+        create_directories(dir);
     }
 }
 
@@ -128,19 +138,4 @@ ResultSet Database::query(string_view sql, initializer_list<Value> paramsList) {
     }
 
     return stmt.executeQuery();
-}
-
-void Database::ensure(string_view dbName) {
-    try {
-        path filePath { dbName };
-        path parent { filePath.parent_path() };
-        if (!exists(parent)) {
-            create_directories(parent);
-        }
-        Database db { dbName };
-    } catch (const filesystem_error& ex) {
-        throw invalid_argument {
-            format("Couldn't ensure the file {0}: {1}", dbName, ex.what())
-        };
-    }
 }
