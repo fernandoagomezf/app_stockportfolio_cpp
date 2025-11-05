@@ -15,14 +15,14 @@ namespace spt::infrastructure::sql {
     using spt::infrastructure::sql::ResultSet;
     using spt::infrastructure::sql::Value;
 
-    export class Statement {
+    export class Statement final {
         friend class Database;
 
         public:                   
             Statement(const Statement&) = delete;
-            Statement(Statement&&) = delete;
+            Statement(Statement&&) = default;
             Statement& operator=(const Statement&) = delete;
-            Statement& operator=(Statement&&) = delete;
+            Statement& operator=(Statement&&) = default;
 
             void bind(int index, std::nullptr_t);
             void bind(int index, int value);

@@ -32,7 +32,9 @@ Statement::Statement(sqlite3* db, string_view sql) {
     int rc = sqlite3_prepare_v2(db, sql.data(), static_cast<int>(sql.size()), &stmt, nullptr);    
     if (rc != SQLITE_OK) {
         auto err = sqlite3_errmsg(db);
-        throw runtime_error { format("Failed to prepare statement: {0}", err) };
+        throw runtime_error { 
+            format("Failed to prepare statement: {0}", err) 
+        };
     }
     
     _stmt.reset(stmt);
