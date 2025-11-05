@@ -19,6 +19,7 @@ namespace spt::infrastructure::repositories {
             Database& getDB();
             const Database& getDB() const;
 
+            virtual void ensureSchema() = 0;
 
         private:
             Database _db;
