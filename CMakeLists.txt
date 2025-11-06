@@ -42,6 +42,9 @@ add_executable(spt WIN32
     src/spt.infrastructure.net/httpresponse.cpp
     src/spt.infrastructure.net/httpclient.ixx
     src/spt.infrastructure.net/httpclient.cpp
+    src/spt.infrastructure.text/spt.infrastructure.text.ixx
+
+    
     src/spt.infrastructure.repositories/spt.infrastructure.repositories.ixx
     src/spt.infrastructure.repositories/repository.ixx
     src/spt.infrastructure.repositories/repository.cpp
