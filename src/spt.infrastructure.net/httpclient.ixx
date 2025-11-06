@@ -33,7 +33,6 @@ namespace spt::infrastructure::net {
 
             static curl_t makeCurl();
             static curl_list_t makeHeaders(const HttpHeaders& headers);
-            static void setOptions(curl_t& curl, string_view url, long timeout, string& responseBody, string& headerBuffer, curl_list_t& headers);
 
             static size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp);
             static size_t headerCallback(void* buffer, size_t size, size_t nitems, void* userp);

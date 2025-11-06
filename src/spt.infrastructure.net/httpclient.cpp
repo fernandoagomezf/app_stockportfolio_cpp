@@ -54,11 +54,22 @@ void HttpClient::timeout(long value) {
 
 HttpResponse HttpClient::send(const HttpRequest& request) const {
     curl_t curl { makeCurl() };
-    curl_list_t headerList { makeHeaders(request.headers()) };
+    curl_list_t headers { makeHeaders(request.headers()) };
     
     string responseBody { };
     string headerBuffer { };
-    setOptions(curl, request.url(), _timeout, responseBody, headerBuffer, headerList);
+
+    curl_easy_setopt(curl.get(), CURLOPT_URL, request.url().data());
+    curl_easy_setopt(curl.get(), CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, _timeout);
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, writeCallback);
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &responseBody);
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, headerCallback);
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &headerBuffer);
+    curl_easy_setopt(curl.get(), CURLOPT_HTTPHEADER, headers.get());
+    curl_easy_setopt(curl.get(), CURLOPT_USERAGENT, "HttpClient/2.0");
+    curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 1L);
+    curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYHOST, 2L);
     
     string body { request.body() };
     switch (request.method()) {
@@ -118,20 +129,6 @@ HttpClient::curl_list_t HttpClient::makeHeaders(const HttpHeaders& headers) {
     return { list, &curl_slist_free_all };
 }
 
-void HttpClient::setOptions(curl_t& curl, string_view url, long timeout, string& responseBody, string& headerBuffer, curl_list_t& headers) {     
-    curl_easy_setopt(curl.get(), CURLOPT_URL, url.data());
-    curl_easy_setopt(curl.get(), CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, timeout);
-    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, writeCallback);
-    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &responseBody);
-    curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, headerCallback);
-    curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &headerBuffer);
-    curl_easy_setopt(curl.get(), CURLOPT_HTTPHEADER, headers.get());
-    curl_easy_setopt(curl.get(), CURLOPT_USERAGENT, "HttpClient/2.0");
-    curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 1L);
-    curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYHOST, 2L);
-}
-
 size_t HttpClient::writeCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     auto* s = static_cast<std::string*>(userp);
     s->append(static_cast<char*>(contents), size * nmemb);
@@ -162,5 +159,5 @@ HttpHeaders HttpClient::parseHeaders(const string& raw) {
         }
     }
 
-    return headers;
+    return move(headers);
 }
