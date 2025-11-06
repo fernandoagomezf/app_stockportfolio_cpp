@@ -13,6 +13,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 set(wxWidgets_USE_STATIC ON)
 
 find_package(SQLite3 REQUIRED)
+find_package(CURL REQUIRED)
 find_package(wxWidgets REQUIRED COMPONENTS core base OPTIONAL_COMPONENTS net gl)
 
 include(${wxWidgets_USE_FILE})
@@ -32,6 +33,15 @@ add_executable(spt WIN32
     src/spt.infrastructure.sql/statement.cpp
     src/spt.infrastructure.sql/database.ixx
     src/spt.infrastructure.sql/database.cpp
+    src/spt.infrastructure.net/spt.infrastructure.net.ixx
+    src/spt.infrastructure.net/httpheaders.ixx
+    src/spt.infrastructure.net/httpheaders.cpp
+    src/spt.infrastructure.net/httprequest.ixx
+    src/spt.infrastructure.net/httprequest.cpp
+    src/spt.infrastructure.net/httpresponse.ixx
+    src/spt.infrastructure.net/httpresponse.cpp
+    src/spt.infrastructure.net/httpclient.ixx
+    src/spt.infrastructure.net/httpclient.cpp
     src/spt.infrastructure.repositories/spt.infrastructure.repositories.ixx
     src/spt.infrastructure.repositories/repository.ixx
     src/spt.infrastructure.repositories/repository.cpp
@@ -43,4 +53,5 @@ add_executable(spt WIN32
 )
 target_link_libraries(spt PRIVATE SQLite::SQLite3)
 target_link_libraries(spt PRIVATE ${wxWidgets_LIBRARIES})
+target_link_libraries(spt PRIVATE CURL::libcurl)
 target_compile_features(spt PUBLIC cxx_std_23)
