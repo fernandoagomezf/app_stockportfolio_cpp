@@ -3,17 +3,19 @@ module spt.infrastructure.net:httpheaders;
 import std;
 import :httpheaders;
 
+using std::nullopt;
+using std::optional;
 using std::string;
 using std::string_view;
 using spt::infrastructure::net::HttpHeaders;
 
-bool HttpHeaders::contains(string_view key) const {
-    return _headers.contains(string { key });
+bool HttpHeaders::contains(const string& key) const {
+    return _headers.contains(key);
 }
 
-string HttpHeaders::get(string_view key) const {
-    string result { };
-    auto it = _headers.find(string { key });
+optional<string> HttpHeaders::get(const string& key) const {
+    optional<string> result { nullopt };
+    auto it = _headers.find(key);
     if (it != _headers.end()) {
         result = it->second;
     }
@@ -21,8 +23,8 @@ string HttpHeaders::get(string_view key) const {
     return result;
 }
 
-void HttpHeaders::set(string_view key, string_view value) {
-    _headers[string { key }] = string { value };
+void HttpHeaders::set(const string& key, const string& value) {
+    _headers[key] = value;
 }
 
 HttpHeaders::iterator HttpHeaders::begin() {

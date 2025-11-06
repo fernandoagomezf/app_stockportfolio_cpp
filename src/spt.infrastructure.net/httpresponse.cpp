@@ -14,7 +14,8 @@ using spt::infrastructure::net::HttpResponse;
 
 HttpResponse::HttpResponse(long status, string_view body, const HttpHeaders& headers)
     : _status { status },
-      _body { body }
+      _body { body },
+      _headers { headers }
 {
 }
 

@@ -36,11 +36,11 @@ const HttpHeaders& HttpRequest::headers() const {
     return _headers;
 }
 
-void HttpRequest::setHeader(string_view key, string_view value) {
+void HttpRequest::setHeader(const string& key, const string& value) {
     _headers.set(key, value);
 }
 
-void HttpRequest::setBody(string_view body) {
-    _body = string { body };
+void HttpRequest::setBody(const string& body) {
+    _body = body;
 }
 

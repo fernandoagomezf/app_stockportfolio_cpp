@@ -24,8 +24,8 @@ namespace spt::infrastructure::net {
             string_view body() const;
             const HttpHeaders& headers() const;
 
-            void setHeader(string_view key, string_view value);
-            void setBody(string_view body);
+            void setHeader(const string& key, const string& value);
+            void setBody(const string& body);
 
         private:
             string _url;

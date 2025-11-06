@@ -7,6 +7,7 @@ import :httprequest;
 import :httpresponse;
 
 namespace spt::infrastructure::net {
+    using std::size_t;
     using std::string;
     using std::string_view;
     using std::unique_ptr;
@@ -18,7 +19,6 @@ namespace spt::infrastructure::net {
     export class HttpClient final {
         public:
             HttpClient();
-            ~HttpClient();
 
             long timeout() const;
             void timeout(long value);
@@ -31,12 +31,12 @@ namespace spt::infrastructure::net {
             using curl_t = unique_ptr<CURL, decltype(&curl_easy_cleanup)>;
             using curl_list_t = unique_ptr<curl_slist, decltype(&curl_slist_free_all)>;
 
-            static curl_t make_curl();
-            static curl_list_t make_headers(const HttpHeaders& headers);
-            static void set_common_opts(curl_t& curl, string_view url, long timeout, string& responseBody, string& headerBuffer, curl_list_t& headers);
+            static curl_t makeCurl();
+            static curl_list_t makeHeaders(const HttpHeaders& headers);
+            static void setOptions(curl_t& curl, string_view url, long timeout, string& responseBody, string& headerBuffer, curl_list_t& headers);
 
-            static size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp);
-            static size_t header_callback(void* buffer, size_t size, size_t nitems, void* userp);
-            static HttpHeaders parse_headers(const string& raw);
+            static size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp);
+            static size_t headerCallback(void* buffer, size_t size, size_t nitems, void* userp);
+            static HttpHeaders parseHeaders(const string& raw);
     };
 }
