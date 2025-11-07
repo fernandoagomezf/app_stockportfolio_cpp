@@ -2,7 +2,7 @@ export module spt.app:application;
 
 import <wx/wx.h>;
 
-namespace spt {
+namespace spt::application {
     export class Application : public wxApp {
         public:
             bool OnInit() override;

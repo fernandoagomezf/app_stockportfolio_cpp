@@ -12,7 +12,7 @@ module spt.app:window;
 
 import :window;
 
-using spt::Window;
+using spt::application::ux::Window;
 
 Window::Window()
     : wxFrame(nullptr, wxID_ANY, "Stock Portfolio Tracker")
