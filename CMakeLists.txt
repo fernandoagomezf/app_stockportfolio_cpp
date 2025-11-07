@@ -43,7 +43,10 @@ add_executable(spt WIN32
     src/spt.infrastructure.net/httpclient.ixx
     src/spt.infrastructure.net/httpclient.cpp
     src/spt.infrastructure.text/spt.infrastructure.text.ixx
-
+    src/spt.infrastructure.text/jsonvalue.ixx
+    src/spt.infrastructure.text/jsonvalue.cpp
+    src/spt.infrastructure.text/jsonparser.ixx
+    src/spt.infrastructure.text/jsonparser.cpp
     
     src/spt.infrastructure.repositories/spt.infrastructure.repositories.ixx
     src/spt.infrastructure.repositories/repository.ixx
