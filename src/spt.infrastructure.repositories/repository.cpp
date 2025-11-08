@@ -1,25 +1,37 @@
-module spt.infrastructure.repositories:repository;
+export module spt.infrastructure.repositories:repository;
 
 import std;
 import spt.infrastructure.sql;
-import :repository;
 
-using std::format;
-using std::getenv;
-using std::string;
-using std::string_view;
-using spt::infrastructure::sql::Database;
-using spt::infrastructure::repositories::Repository;
+namespace spt::infrastructure::repositories {
+    using std::format;
+    using std::getenv;
+    using std::string;
+    using std::string_view;
+    using spt::infrastructure::sql::Database;
 
-Repository::Repository() 
-    : _db { format("{0}\\Blendwerk\\SPT\\spt.db", getenv("USERPROFILE")) } 
-{
+    export class Repository {
+        private:
+            Database _db;
+
+        protected:
+            Database& getDB() {
+                return _db;
+            }
+
+            const Database& getDB() const {
+                return _db;
+            }
+
+            virtual void ensureSchema() = 0;
+
+        public:
+            Repository() 
+                : _db { format("{0}\\Blendwerk\\SPT\\spt.db", getenv("USERPROFILE")) } {
+            }
+
+            Repository(const Repository&) = delete;
+            Repository(Repository&&) = delete;
+            virtual ~Repository() = default;        
+    };
 }
-Database& Repository::getDB() {
-    return _db;
-}
-
-const Database& Repository::getDB() const {
-    return _db;
-}
-

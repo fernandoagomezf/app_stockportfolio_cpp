@@ -1,21 +1,15 @@
-module;
+export module spt.app:window;
 
-#include <wx/wx.h>
-#include <wx/msgdlg.h>
-#include <wx/dirdlg.h>
-#include <wx/filedlg.h>
-#include <wx/toolbar.h>
-#include <wx/artprov.h>
-#include <wx/grid.h>
+import <wx/wx.h>;
+import <wx/grid.h>;
 
-module spt.app:window;
-
-import :window;
-
-using spt::application::ux::Window;
-
-Window::Window()
-    : wxFrame(nullptr, wxID_ANY, "Stock Portfolio Tracker")
-{
-    Maximize();
+namespace spt::application::ux {
+    export class Window final : public wxFrame {
+        public:
+            Window()
+                : wxFrame(nullptr, wxID_ANY, "Stock Portfolio Tracker")
+            {
+                Maximize();
+            }
+    };
 }

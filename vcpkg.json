@@ -1,7 +1,8 @@
 {
   "dependencies": [
+    "curl",
     "sqlite3",
     "wxwidgets",
-    "curl"
+    "boost-uuid"
   ]
 }

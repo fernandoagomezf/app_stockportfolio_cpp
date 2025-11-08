@@ -1,30 +1,39 @@
-module spt.infrastructure.sql:resultset;
+export module spt.infrastructure.sql:resultset;
 
 import std;
 import :row;
-import :resultset;
 
-using std::move;
-using std::size_t;
-using spt::infrastructure::sql::Row;
-using spt::infrastructure::sql::ResultSet;
+namespace spt::infrastructure::sql {
+    using std::move;
+    using std::size_t;
+    using std::vector;
+    using spt::infrastructure::sql::Row;
 
-size_t ResultSet::count() const {
-    return _rows.size();
-}
+    export class ResultSet {
+        public:
+            using const_iterator = vector<Row>::const_iterator;
 
-void ResultSet::add(Row row) {
-    _rows.push_back(move(row));
-}
+            size_t count() const {
+                return _rows.size();
+            }
 
-void ResultSet::clear() {
-    _rows.clear();
-}
-    
-ResultSet::const_iterator ResultSet::begin() const {
-    return _rows.cbegin();
-}
+            void add(Row row) {
+                _rows.push_back(move(row));
+            }
 
-ResultSet::const_iterator ResultSet::end() const {
-    return _rows.cend();
+            void clear() {
+                _rows.clear();
+            }
+
+            const_iterator begin() const {
+                return _rows.cbegin();
+            }
+
+            const_iterator end() const {
+                return _rows.cend();
+            }
+
+        private:
+            vector<Row> _rows;
+    };
 }

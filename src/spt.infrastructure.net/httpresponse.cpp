@@ -1,36 +1,41 @@
-module spt.infrastructure.net:httpresponse;
+export module spt.infrastructure.net:httpresponse;
 
 import std;
 import :httpheaders;
-import :httpresponse;
 
-using std::invalid_argument;
-using std::map;
-using std::move;
-using std::string;
-using std::string_view;
-using spt::infrastructure::net::HttpHeaders;
-using spt::infrastructure::net::HttpResponse;
+namespace spt::infrastructure::net {
+    using std::string;
+    using std::string_view;
+    using spt::infrastructure::net::HttpHeaders;
 
-HttpResponse::HttpResponse(long status, string_view body, const HttpHeaders& headers)
-    : _status { status },
-      _body { body },
-      _headers { headers }
-{
-}
+    export class HttpResponse final {
+        private:
+            long _status;
+            string _body;
+            HttpHeaders _headers;
 
-bool HttpResponse::isSuccess() const {
-    return _status >= 200 && _status < 300;
-}
+        public:
+            HttpResponse(long status, string_view body, const HttpHeaders& headers) 
+                : _status { status },
+                  _body { body },
+                  _headers { headers } 
+            {
+            }
 
-long HttpResponse::status() const {
-    return _status;
-}
+            bool isSuccess() const {
+                return _status >= 200 && _status < 300;
+            }
 
-string_view HttpResponse::body() const {
-    return _body;
-}
+            long status() const {
+                return _status;
+            }
 
-const HttpHeaders& HttpResponse::headers() const {
-    return _headers;
+            string_view body() const {
+                return _body;
+            }
+
+            const HttpHeaders& headers() const {
+                return _headers;
+            }
+    };
 }

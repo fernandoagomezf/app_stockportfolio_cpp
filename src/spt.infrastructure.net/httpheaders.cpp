@@ -1,44 +1,54 @@
-module spt.infrastructure.net:httpheaders;
+export module spt.infrastructure.net:httpheaders;
 
 import std;
-import :httpheaders;
 
-using std::nullopt;
-using std::optional;
-using std::string;
-using std::string_view;
-using spt::infrastructure::net::HttpHeaders;
+namespace spt::infrastructure::net {
+    using std::map;
+    using std::nullopt;
+    using std::optional;
+    using std::string;
+    using std::string_view;
 
-bool HttpHeaders::contains(const string& key) const {
-    return _headers.contains(key);
-}
+    export class HttpHeaders final {
+        public:
+            using iterator = map<string, string>::iterator;
+            using const_iterator = map<string, string>::const_iterator;
 
-optional<string> HttpHeaders::get(const string& key) const {
-    optional<string> result { nullopt };
-    auto it = _headers.find(key);
-    if (it != _headers.end()) {
-        result = it->second;
-    }
+            bool contains(const string& key) const {
+                return _headers.contains(key);
+            }
 
-    return result;
-}
+            optional<string> get(const string& key) const {
+                optional<string> result { nullopt };
+                auto it = _headers.find(key);
+                if (it != _headers.end()) {
+                    result = it->second;
+                }
 
-void HttpHeaders::set(const string& key, const string& value) {
-    _headers[key] = value;
-}
+                return result;
+            }
 
-HttpHeaders::iterator HttpHeaders::begin() {
-    return _headers.begin();
-}
+            void set(const string& key, const string& value) {
+                _headers[key] = value;
+            }
 
-HttpHeaders::iterator HttpHeaders::end() {
-    return _headers.end();
-}
+            iterator begin() {
+                return _headers.begin();
+            }
 
-HttpHeaders::const_iterator HttpHeaders::begin() const {
-    return _headers.begin();
-}
+            iterator end() {
+                return _headers.end();
+            }
 
-HttpHeaders::const_iterator HttpHeaders::end() const {
-    return _headers.end();
+            const_iterator begin() const {
+                return _headers.begin();
+            }
+
+            const_iterator end() const {
+                return _headers.end();
+            }
+
+        private:
+            map<string, string> _headers;
+    };
 }

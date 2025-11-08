@@ -1,38 +1,40 @@
-module spt.infrastructure.sql:row;
+export module spt.infrastructure.sql:row;
 
 import std;
 import :value;
-import :row;
 
-using std::format;
-using std::map;
-using std::out_of_range;
-using std::size_t;
-using std::string;
-using std::string_view;
-using spt::infrastructure::sql::Value;
-using spt::infrastructure::sql::Row;
+namespace spt::infrastructure::sql {
+    using std::map;
+    using std::out_of_range;
+    using std::size_t;
+    using std::string;
+    using std::string_view;
+    using spt::infrastructure::sql::Value;
 
-size_t Row::count() const {
-    return _columns.size();
+    export class Row {
+        public:
+            size_t count() const {
+                return _columns.size();
+            }
+
+            bool contains(const string& name) const {
+                return _columns.contains(name);
+            }
+            const Value& get(const string& name) const {
+                auto it = _columns.find(name);
+                if (it == _columns.end()) {
+                    throw out_of_range {
+                        format("Column not found: {0}", name)
+                    };
+                }
+                return it->second;
+            }
+
+            void set(const string& name, Value value) {
+                _columns[name] = value;
+            }
+
+        private:
+            map<string, Value> _columns;
+    };
 }
-
-bool Row::contains(string_view name) const {
-    return _columns.contains(string { name });
-}
-
-const Value& Row::get(string_view name) const {
-    auto it = _columns.find(string { name });
-    if (it == _columns.end()) {
-        throw out_of_range {
-            format("Column not found: {0}", string { name })
-        };
-    }
-    return it->second;
-}
-
-void Row::set(const string& name, Value value) {
-    _columns[name] = value;
-}
-
-
