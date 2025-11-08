@@ -2,8 +2,8 @@ export module spt.app:application;
 
 import <wx/wx.h>;
 import :window;
-import spt.infrastructure.net;
-import spt.infrastructure.text;
+import spt.domain;
+import spt.infrastructure;
 
 namespace spt::application {
     using std::format;

@@ -1,4 +1,4 @@
-export module spt.infrastructure.sql:statement;
+export module spt.infrastructure:statement;
 
 import std;
 import :value;

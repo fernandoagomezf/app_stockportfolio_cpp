@@ -1,4 +1,4 @@
-export module spt.infrastructure.sql:database;
+export module spt.infrastructure:database;
 
 import <sqlite3.h>;
 import std;

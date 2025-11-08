@@ -1,4 +1,4 @@
-export module spt.infrastructure.sql:resultset;
+export module spt.infrastructure:resultset;
 
 import std;
 import :row;

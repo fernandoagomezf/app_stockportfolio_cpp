@@ -1,4 +1,4 @@
-export module spt.infrastructure.sql:row;
+export module spt.infrastructure:row;
 
 import std;
 import :value;

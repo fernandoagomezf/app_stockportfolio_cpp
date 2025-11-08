@@ -1,4 +1,4 @@
-export module spt.infrastructure.text:jsonvalue;
+export module spt.infrastructure:jsonvalue;
 
 import std;
 

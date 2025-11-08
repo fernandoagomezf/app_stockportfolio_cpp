@@ -1,7 +1,7 @@
-export module spt.infrastructure.repositories:repository;
+export module spt.infrastructure:repository;
 
 import std;
-import spt.infrastructure.sql;
+import :database;
 
 namespace spt::infrastructure::repositories {
     using std::format;

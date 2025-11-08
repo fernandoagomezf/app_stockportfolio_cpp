@@ -1,4 +1,4 @@
-export module spt.infrastructure.text:jsonparser;
+export module spt.infrastructure:jsonparser;
 
 import std;
 import :jsonvalue;

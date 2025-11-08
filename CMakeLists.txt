@@ -24,22 +24,19 @@ add_executable(spt WIN32
     src/spt.domain/spt.domain.ixx
     src/spt.domain/pricepoint.cpp
     # infrastructure module
-    src/spt.infrastructure.sql/spt.infrastructure.sql.ixx
-    src/spt.infrastructure.sql/value.cpp
-    src/spt.infrastructure.sql/row.cpp
-    src/spt.infrastructure.sql/resultset.cpp    
-    src/spt.infrastructure.sql/statement.cpp    
-    src/spt.infrastructure.sql/database.cpp
-    src/spt.infrastructure.net/spt.infrastructure.net.ixx
-    src/spt.infrastructure.net/httpheaders.cpp
-    src/spt.infrastructure.net/httprequest.cpp
-    src/spt.infrastructure.net/httpresponse.cpp
-    src/spt.infrastructure.net/httpclient.cpp
-    src/spt.infrastructure.text/spt.infrastructure.text.ixx    
-    src/spt.infrastructure.text/jsonvalue.cpp    
-    src/spt.infrastructure.text/jsonparser.cpp    
-    src/spt.infrastructure.repositories/spt.infrastructure.repositories.ixx
-    src/spt.infrastructure.repositories/repository.cpp
+    src/spt.infrastructure/spt.infrastructure.ixx
+    src/spt.infrastructure/value.cpp
+    src/spt.infrastructure/row.cpp
+    src/spt.infrastructure/resultset.cpp    
+    src/spt.infrastructure/statement.cpp    
+    src/spt.infrastructure/database.cpp    
+    src/spt.infrastructure/httpheaders.cpp
+    src/spt.infrastructure/httprequest.cpp
+    src/spt.infrastructure/httpresponse.cpp
+    src/spt.infrastructure/httpclient.cpp
+    src/spt.infrastructure/jsonvalue.cpp    
+    src/spt.infrastructure/jsonparser.cpp    
+    src/spt.infrastructure/repository.cpp
     # application module
     src/spt.app/spt.app.ixx
     src/spt.app/application.cpp

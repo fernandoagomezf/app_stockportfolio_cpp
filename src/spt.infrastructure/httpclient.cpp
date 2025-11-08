@@ -1,4 +1,4 @@
-export module spt.infrastructure.net:httpclient;
+export module spt.infrastructure:httpclient;
 
 import <curl/curl.h>;
 

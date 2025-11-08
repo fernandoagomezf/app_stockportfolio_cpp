@@ -1,4 +1,4 @@
-export module spt.infrastructure.net:httpheaders;
+export module spt.infrastructure:httpheaders;
 
 import std;
 
