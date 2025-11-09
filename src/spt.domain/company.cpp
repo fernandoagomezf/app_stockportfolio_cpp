@@ -1,6 +1,7 @@
 export module spt.domain:company;
 
 import std;
+import :ticker;
 import :transaction;
 import :pricepoint;
 
@@ -13,26 +14,24 @@ namespace spt::domain::investments {
     using std::vector;
     using std::views::filter;
     using std::views::transform;
+    using spt::domain::investments::Ticker;
     using spt::domain::investments::Transaction;
     using spt::domain::investments::PricePoint;
 
     export class Company final {
         private:
-            string _symbol;
+            Ticker _ticker;
             string _name;
             vector<Transaction> _transactions;
             stack<PricePoint> _pricePoints;
 
         public:
-            Company(const string& symbol, const string& name)
-                : _symbol { symbol },
+            Company(const Ticker& ticker, const string& name)
+                : _ticker { ticker },
                   _name { name },
                   _transactions { },
                   _pricePoints { }
-            {
-                if (symbol.empty()) {
-                    throw invalid_argument { "The company ticker symbol cannot be empty" };
-                }
+            {                
                 if (name.empty()) {
                     throw invalid_argument { "The company must have a valid name" };
                 }
@@ -64,7 +63,5 @@ namespace spt::domain::investments {
                 auto result = fold_left(total, 0, plus<>{});
                 return result;
             }
-
-            
     };
 }

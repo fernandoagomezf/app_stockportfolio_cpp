@@ -3,6 +3,7 @@ export module spt.domain:ticker;
 import std;
 
 namespace spt::domain::investments {
+    using std::invalid_argument;
     using std::string;
     using std::string_view;
 
@@ -14,6 +15,9 @@ namespace spt::domain::investments {
             explicit Ticker(string_view symbol)
                 : _symbol { symbol }
             {
+                if (symbol.empty()) {
+                    throw invalid_argument { "The company ticker symbol cannot be empty" };
+                }
             }
 
             auto operator<=>(const Ticker& other) const = default;
