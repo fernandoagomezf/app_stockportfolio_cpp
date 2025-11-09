@@ -11,7 +11,7 @@ namespace spt::domain::investments {
         Buy, Sell
     };
 
-    export class Transaction {
+    export class Transaction final {
         private:
             TransactionType _type;
             int _shares;
