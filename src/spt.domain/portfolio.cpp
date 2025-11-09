@@ -21,8 +21,10 @@ namespace spt::domain::investments {
 
         public:
             void track(Ticker ticker) {
-                Company company { ticker };
-                _companies.emplace(ticker, move(company));
+                if (!_companies.contains(ticker)) {
+                    Company company { ticker };
+                    _companies.emplace(ticker, move(company));                    
+                }
             }
 
             Money capital() const {
@@ -43,11 +45,8 @@ namespace spt::domain::investments {
                     throw invalid_argument { "Number of shares to buy must be positive." };
                 }
 
-                if (!_companies.contains(ticker)){
-                    track(ticker);
-                }
-                
-                auto company { _companies.at(ticker) };
+                track(ticker);                
+                Company company { _companies.at(ticker) };
                 company.buyShares(shares);
             }
 
@@ -56,10 +55,8 @@ namespace spt::domain::investments {
                     throw invalid_argument { "Number of shares to sell must be positive." };
                 }
 
-                if (!_companies.contains(ticker)){
-                    track(ticker);
-                }
-                auto company { _companies.at(ticker) };
+                track(ticker);
+                Company company { _companies.at(ticker) };
                 company.sellShares(shares);
             }
     };
