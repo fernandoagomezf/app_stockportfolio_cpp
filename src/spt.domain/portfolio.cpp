@@ -14,14 +14,6 @@ namespace spt::domain::investments {
             map<Ticker, Company> _companies;
 
         public:
-            void track(const Company& company) {
-                _companies.emplace(company.getTicker(), company);
-            }
-
-            void track(Company&& company) {
-                _companies.emplace(company.getTicker(), move(company));
-            }
-
             void track(const Ticker& ticker, const string& name) {
                 Company company { ticker, name };
                 _companies.emplace(ticker, move(company));
@@ -31,5 +23,7 @@ namespace spt::domain::investments {
                 Company company { ticker, ticker };
                 _companies.emplace(ticker, move(company));
             }
+
+            
     };
 }
