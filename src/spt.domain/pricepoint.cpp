@@ -1,36 +1,32 @@
 export module spt.domain:pricepoint;
 
 import std;
+import :price;
 
 namespace spt::domain::investments {
     using std::chrono::system_clock;
     using std::invalid_argument;
+    using spt::domain::investments::Price;
 
     export class PricePoint final {
         private:
             system_clock::time_point _stamp;
-            double _price;
+            Price _price;
 
         public:            
-            explicit PricePoint(double price)
+            explicit PricePoint(Price price)
                 : _stamp { system_clock::now() }, 
                   _price { price } 
             {
-                if (price < 0.01) {
-                    throw invalid_argument { "Price cannot be less than one cent" };
-                }
             }
 
-            PricePoint(system_clock::time_point stamp, double price)
+            PricePoint(system_clock::time_point stamp, Price price)
                 : _stamp { stamp }, 
                   _price { price } 
             {
-                if (price < 0.01) {
-                    throw invalid_argument { "Price cannot be less than one cent" };
-                }
             }
 
-            double getPrice() const {
+            Price getPrice() const {
                 return _price;
             }
 
