@@ -6,8 +6,11 @@ import :pricepoint;
 
 namespace spt::domain::investments {
     using std::invalid_argument;
+    using std::ranges::fold_left;
     using std::string;
     using std::vector;
+    using std::views::filter;
+    using std::views::transform;
     using spt::domain::investments::Transaction;
     using spt::domain::investments::PricePoint;
 
@@ -37,6 +40,29 @@ namespace spt::domain::investments {
                 if (newPrice < 0.01) {
                     throw invalid_argument { "Price cannot be less than one cent" };
                 }
+            }
+
+            int sharesBought() const {
+                auto bought = _transactions
+                    | filter([](const auto& tx) { return tx.isBuying(); })
+                    | transform([](const auto& tx) { return tx.getShares(); });
+                auto result = fold_left(bought, 0, std::plus<>{});
+                return result;
+            }
+
+            int sharesSold() const {
+                auto sold = _transactions
+                    | filter([](const auto& tx) { return tx.isSelling(); })
+                    | transform([](const auto& tx) { return tx.getShares(); });
+                auto result = fold_left(sold, 0, std::plus<>{});
+                return result;
+            }
+
+            int shareCount() const {
+                auto total = _transactions
+                    | transform([] (const auto& tx) { return tx.isBuying() ? tx.getShares() : -tx.getShares(); });
+                auto result = fold_left(total, 0, std::plus<>{});
+                return result;
             }
     };
 }

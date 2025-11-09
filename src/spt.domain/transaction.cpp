@@ -36,6 +36,14 @@ namespace spt::domain::investments {
                 return _type;
             }
 
+            bool isBuying() const {
+                return _type == TransactionType::Buy;
+            }
+
+            bool isSelling() const {
+                return _type == TransactionType::Sell;
+            }
+
             int getShares() const {
                 return _shares;
             }
