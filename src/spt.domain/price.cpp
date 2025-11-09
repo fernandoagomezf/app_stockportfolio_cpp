@@ -19,5 +19,9 @@ namespace spt::domain::investments {
             }
 
             auto operator<=>(const Price& other) const = default;
+            
+            auto operator*(int factor) const {
+                return Price { _amount * factor };
+            }
     };
 }
