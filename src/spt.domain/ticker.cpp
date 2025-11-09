@@ -21,5 +21,9 @@ namespace spt::domain::investments {
             }
 
             auto operator<=>(const Ticker& other) const = default;
+
+            operator string() const {
+                return _symbol;
+            }
     };
 }

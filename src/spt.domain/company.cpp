@@ -37,6 +37,10 @@ namespace spt::domain::investments {
                 }
             }
 
+            Ticker getTicker() const {
+                return _ticker;
+            }
+
             void updatePrice(Price newPrice) {
                 _pricePoints.emplace(newPrice);
             }
