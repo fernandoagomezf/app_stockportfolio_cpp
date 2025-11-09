@@ -22,6 +22,7 @@ include(${wxWidgets_USE_FILE})
 add_executable(spt WIN32
     # domain module
     src/spt.domain/spt.domain.ixx
+    src/spt.domain/ticker.cpp
     src/spt.domain/price.cpp
     src/spt.domain/pricepoint.cpp
     src/spt.domain/transaction.cpp
