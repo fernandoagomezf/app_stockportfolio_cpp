@@ -6,7 +6,7 @@ namespace spt::domain::investments {
     using std::chrono::system_clock;
     using std::invalid_argument;
 
-    export class PricePoint {
+    export class PricePoint final {
         private:
             system_clock::time_point _stamp;
             double _price;
