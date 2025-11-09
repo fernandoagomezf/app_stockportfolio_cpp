@@ -26,6 +26,7 @@ add_executable(spt WIN32
     src/spt.domain/pricepoint.cpp
     src/spt.domain/transaction.cpp
     src/spt.domain/company.cpp
+    src/spt.domain/portfolio.cpp
     # infrastructure module
     src/spt.infrastructure/spt.infrastructure.ixx
     src/spt.infrastructure/value.cpp
