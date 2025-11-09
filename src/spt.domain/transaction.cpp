@@ -28,7 +28,7 @@ namespace spt::domain::investments {
                 if (shares <= 0) {
                     throw invalid_argument { "Share count cannot be zero or negative" };
                 }
-                if (unitPrice <= 0.001) {
+                if (unitPrice < 0.01) {
                     throw invalid_argument { "Share unit price cannot be less than one cent" };
                 }
             }

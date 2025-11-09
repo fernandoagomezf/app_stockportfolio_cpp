@@ -16,8 +16,8 @@ namespace spt::domain::investments {
                 : _stamp { system_clock::now() }, 
                   _price { price } 
             {
-                if (price < 0.0) {
-                    throw invalid_argument { "Price cannot be negative" };
+                if (price < 0.01) {
+                    throw invalid_argument { "Price cannot be less than one cent" };
                 }
             }
 
@@ -25,8 +25,8 @@ namespace spt::domain::investments {
                 : _stamp { stamp }, 
                   _price { price } 
             {
-                if (price < 0.0) {
-                    throw invalid_argument { "Price cannot be negative" };
+                if (price < 0.01) {
+                    throw invalid_argument { "Price cannot be less than one cent" };
                 }
             }
 
