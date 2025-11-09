@@ -8,6 +8,7 @@ namespace spt::domain::investments {
     using std::invalid_argument;
     using std::plus;
     using std::ranges::fold_left;
+    using std::stack;
     using std::string;
     using std::vector;
     using std::views::filter;
@@ -20,7 +21,7 @@ namespace spt::domain::investments {
             string _symbol;
             string _name;
             vector<Transaction> _transactions;
-            vector<PricePoint> _pricePoints;
+            stack<PricePoint> _pricePoints;
 
         public:
             Company(const string& symbol, const string& name)
@@ -37,10 +38,8 @@ namespace spt::domain::investments {
                 }
             }
 
-            void changePricePoint(double newPrice) {
-                if (newPrice < 0.01) {
-                    throw invalid_argument { "Price cannot be less than one cent" };
-                }
+            void updatePrice(Price newPrice) {
+                _pricePoints.emplace(newPrice);
             }
 
             int sharesBought() const {
@@ -65,5 +64,7 @@ namespace spt::domain::investments {
                 auto result = fold_left(total, 0, plus<>{});
                 return result;
             }
+
+            
     };
 }

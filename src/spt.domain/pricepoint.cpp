@@ -25,13 +25,5 @@ namespace spt::domain::investments {
                   _price { price } 
             {
             }
-
-            Price getPrice() const {
-                return _price;
-            }
-
-            system_clock::time_point getStamp() const {
-                return _stamp;
-            }
     };
 }
