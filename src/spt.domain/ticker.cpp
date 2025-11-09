@@ -20,10 +20,10 @@ namespace spt::domain::investments {
                 }
             }
 
-            auto operator<=>(const Ticker& other) const = default;
-
-            operator string() const {
+            string symbol() const {
                 return _symbol;
             }
+
+            auto operator<=>(const Ticker& other) const = default;
     };
 }

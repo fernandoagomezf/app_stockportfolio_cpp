@@ -1,21 +1,27 @@
 export module spt.domain:price;
 
 import std;
+import :money;
 
 namespace spt::domain::investments {
     using std::invalid_argument;
+    using spt::domain::investments::Money;
 
     export class Price final {
         private:
-            double _amount;
+            Money _amount;
 
         public:
-            explicit Price(double amount)
+            explicit Price(Money amount)
                 : _amount { amount }
             {
-                if (amount < 0.01) {
-                    throw invalid_argument { "Price cannot be less than one cent" };
+                if (amount.isZero()) {
+                    throw invalid_argument { "Price cannot be zero" };
                 }
+            }
+
+            Money amount() const {
+                return _amount;
             }
 
             auto operator<=>(const Price& other) const = default;

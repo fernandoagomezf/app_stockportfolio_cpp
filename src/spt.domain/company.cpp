@@ -26,18 +26,15 @@ namespace spt::domain::investments {
             stack<PricePoint> _pricePoints;
 
         public:
-            Company(const Ticker& ticker, const string& name)
+            explicit Company(Ticker ticker)
                 : _ticker { ticker },
-                  _name { name },
+                  _name { ticker.symbol() },
                   _transactions { },
                   _pricePoints { }
-            {                
-                if (name.empty()) {
-                    throw invalid_argument { "The company must have a valid name" };
-                }
+            {
             }
 
-            Ticker getTicker() const {
+            Ticker ticker() const {
                 return _ticker;
             }
 
@@ -66,6 +63,27 @@ namespace spt::domain::investments {
                     | transform([] (const auto& tx) { return tx.isBuying() ? tx.getShares() : -tx.getShares(); });
                 auto result = fold_left(total, 0, plus<>{});
                 return result;
+            }
+
+            void buyShares(int shares) {
+                if (shares <= 0) {
+                    throw invalid_argument { "Number of shares to buy must be positive." };
+                }
+
+                PricePoint pt { _pricePoints.top() };
+                _transactions.emplace_back(TransactionType::Buy, shares, pt.price());
+            }
+
+            void sellShares(int shares) {
+                if (shares <= 0) {
+                    throw invalid_argument { "Number of shares to sell must be positive." };
+                }
+                if (shares > shareCount()) {
+                    throw invalid_argument { "Cannot sell more shares than currently owned." };
+                }
+
+                PricePoint pt { _pricePoints.top() };
+                _transactions.emplace_back(TransactionType::Sell, shares, pt.price());
             }
     };
 }

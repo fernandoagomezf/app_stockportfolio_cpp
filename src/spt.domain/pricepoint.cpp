@@ -25,5 +25,33 @@ namespace spt::domain::investments {
                   _price { price } 
             {
             }
+
+            system_clock::time_point stamp() const {
+                return _stamp;
+            }
+
+            Price price() const {
+                return _price;
+            }
+
+            int compareTime(const PricePoint& other) const {
+                if (_stamp < other._stamp) {
+                    return -1;
+                } else if (_stamp > other._stamp) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+
+            int comparePrice(const PricePoint& other) const {
+                if (_price < other._price) {
+                    return -1;
+                } else if (_price > other._price) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
     };
 }
