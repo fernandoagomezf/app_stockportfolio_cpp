@@ -1,12 +1,21 @@
+module;
+
+#include <wx/wx.h>
+#include <wx/grid.h>
+#include <wx/artprov.h>
+
 export module spt.app:window;
 
-import <wx/wx.h>;
-import <wx/grid.h>;
-import <wx/artprov.h>;
+import std;
+import :tickerselectordialog;
 
 namespace spt::application::ux {
+    using std::string;
+    using std::vector;
+    
     enum class MenuId {
-        Preferences = wxID_HIGHEST + 1
+        NewSession = wxID_HIGHEST + 1,
+        Preferences
     };
 
     export class Window final : public wxFrame {
@@ -26,6 +35,8 @@ namespace spt::application::ux {
                 wxMenuBar* menuBar = new wxMenuBar();
 
                 wxMenu* fileMenu = new wxMenu();
+                fileMenu->Append(static_cast<int>(MenuId::NewSession), "&New Session\tCtrl-N", "Create a new trading session");
+                fileMenu->AppendSeparator();
                 fileMenu->Append(wxID_EXIT, "&Exit\tAlt-F4", "Exit the application");
                 menuBar->Append(fileMenu, "&File");
 
@@ -39,6 +50,7 @@ namespace spt::application::ux {
 
                 SetMenuBar(menuBar);
 
+                Bind(wxEVT_MENU, &Window::onNewSession, this, static_cast<int>(MenuId::NewSession));
                 Bind(wxEVT_MENU, &Window::onExit, this, wxID_EXIT);
                 Bind(wxEVT_MENU, &Window::onPreferences, this, static_cast<int>(MenuId::Preferences));
                 Bind(wxEVT_MENU, &Window::onAbout, this, wxID_ABOUT);
@@ -46,6 +58,13 @@ namespace spt::application::ux {
 
             void createToolBar() {
                 wxToolBar* toolBar = CreateToolBar(wxTB_HORIZONTAL | wxTB_TEXT);
+                
+                toolBar->AddTool(
+                    static_cast<int>(MenuId::NewSession),
+                    "New Session",
+                    wxArtProvider::GetBitmap(wxART_NEW, wxART_TOOLBAR),
+                    "Create a new trading session"
+                );
                 
                 toolBar->AddTool(
                     static_cast<int>(MenuId::Preferences),
@@ -56,6 +75,7 @@ namespace spt::application::ux {
 
                 toolBar->Realize();
 
+                Bind(wxEVT_TOOL, &Window::onNewSession, this, static_cast<int>(MenuId::NewSession));
                 Bind(wxEVT_TOOL, &Window::onPreferences, this, static_cast<int>(MenuId::Preferences));
             }
 
@@ -66,6 +86,32 @@ namespace spt::application::ux {
 
             void onExit(wxCommandEvent& event) {
                 Close(true);
+            }
+
+            void onNewSession(wxCommandEvent& event) {
+                TickerSelectorDialog dialog(this);
+                
+                if (dialog.ShowModal() == wxID_OK) {
+                    vector<string> selectedSymbols = dialog.getSelectedSymbols();
+                    
+                    // Create comma-separated string
+                    string symbolsStr;
+                    for (size_t i = 0; i < selectedSymbols.size(); ++i) {
+                        symbolsStr += selectedSymbols[i];
+                        if (i < selectedSymbols.size() - 1) {
+                            symbolsStr += ", ";
+                        }
+                    }
+                    
+                    wxMessageBox(
+                        "Selected symbols: " + symbolsStr,
+                        "New Session Created",
+                        wxOK | wxICON_INFORMATION,
+                        this
+                    );
+                    
+                    SetStatusText("Session created with " + std::to_string(selectedSymbols.size()) + " ticker(s)");
+                }
             }
 
             void onPreferences(wxCommandEvent& event) {
