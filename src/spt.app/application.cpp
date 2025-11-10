@@ -9,15 +9,8 @@ import spt.domain;
 import spt.infrastructure;
 
 namespace spt::application {
-    using std::format;
     using std::string;
     using spt::application::ux::Window;
-    using spt::infrastructure::net::HttpClient;
-    using spt::infrastructure::net::HttpMethod;
-    using spt::infrastructure::net::HttpRequest;
-    using spt::infrastructure::net::HttpResponse;
-    using spt::infrastructure::text::JsonParser;
-    using spt::infrastructure::text::JsonValue;
 
     export class Application : public wxApp {
         public:
