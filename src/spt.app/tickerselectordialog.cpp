@@ -73,9 +73,10 @@ namespace spt::application::ux {
 
                 // Populate grid
                 for (size_t i = 0; i < _tickers.size(); ++i) {
+                    // Set up boolean checkbox cell
                     _grid->SetCellRenderer(i, 0, new wxGridCellBoolRenderer());
                     _grid->SetCellEditor(i, 0, new wxGridCellBoolEditor());
-                    _grid->SetCellValue(i, 0, "0");
+                    _grid->SetCellValue(i, 0, "");  // Empty for unchecked, or use "" instead of "0"
                     
                     _grid->SetCellValue(i, 1, _tickers[i].symbol);
                     _grid->SetCellValue(i, 2, _tickers[i].name);
@@ -115,9 +116,16 @@ namespace spt::application::ux {
             }
 
             void onOk(wxCommandEvent& event) {
+                // Disable cell editor to avoid assertion
+                if (_grid->IsCellEditControlEnabled()) {
+                    _grid->DisableCellEditControl();
+                }
+                
                 // Update ticker selection from grid
                 for (size_t i = 0; i < _tickers.size(); ++i) {
-                    _tickers[i].selected = (_grid->GetCellValue(i, 0) == "1");
+                    wxString cellValue = _grid->GetCellValue(i, 0);
+                    // Boolean cells are checked if the value is non-empty (typically "1")
+                    _tickers[i].selected = !cellValue.IsEmpty() && cellValue != "0";
                 }
 
                 // Check if at least one ticker is selected
