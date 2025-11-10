@@ -64,5 +64,11 @@ namespace spt::domain::investments {
                 Company company { _companies.at(ticker) };
                 company.sellShares(shares);
             }
+
+            void updatePrice(Ticker ticker, Price newPrice) {
+                track(ticker);
+                Company& company = _companies.at(ticker);
+                company.updatePrice(newPrice);
+            }
     };
 }
