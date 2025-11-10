@@ -38,6 +38,22 @@ namespace spt::domain::investments {
                 return _ticker;
             }
 
+            Money currentPrice() const {
+                if (_pricePoints.empty()) {
+                    return Money::zero();
+                } else {
+                    return _pricePoints
+                        .top()
+                        .price()
+                        .amount();
+                }
+            }
+
+            Money priceFor(int shares) const {
+                Money price = currentPrice();
+                return price * shares;
+            }
+
             void updatePrice(Price newPrice) {
                 _pricePoints.emplace(newPrice);
             }
