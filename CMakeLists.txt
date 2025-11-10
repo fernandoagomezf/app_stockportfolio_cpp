@@ -46,7 +46,7 @@ add_executable(spt WIN32
     # application module
     src/spt.app/spt.app.ixx
     src/spt.app/application.cpp
-    src/spt.app/tickerselectordialog.cpp
+    src/spt.app/portfoliodialog.cpp
     src/spt.app/window.cpp
 )
 target_link_libraries(spt PRIVATE Boost::uuid)

@@ -16,7 +16,7 @@ namespace spt::domain::investments {
 
     export class Portfolio final {
         private:
-            Money _capital;
+            Money _capital { 0.0 };
             map<Ticker, Company> _companies;
 
         public:

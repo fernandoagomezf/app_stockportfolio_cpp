@@ -7,7 +7,7 @@ module;
 export module spt.app:window;
 
 import std;
-import :tickerselectordialog;
+import :portfoliodialog;
 
 namespace spt::application::ux {
     using std::string;
@@ -89,28 +89,22 @@ namespace spt::application::ux {
             }
 
             void onNewSession(wxCommandEvent& event) {
-                TickerSelectorDialog dialog(this);
+                PortfolioDialog dialog(this);
                 
                 if (dialog.ShowModal() == wxID_OK) {
-                    vector<string> selectedSymbols = dialog.getSelectedSymbols();
-                    
-                    // Create comma-separated string
-                    string symbolsStr;
-                    for (size_t i = 0; i < selectedSymbols.size(); ++i) {
-                        symbolsStr += selectedSymbols[i];
-                        if (i < selectedSymbols.size() - 1) {
-                            symbolsStr += ", ";
-                        }
+                    auto opt = dialog.getPortfolio();
+                    if (!opt.has_value()) {
+                        wxMessageBox(
+                            "No portfolio was created.",
+                            "Error",
+                            wxOK | wxICON_ERROR,
+                            this
+                        );
+                        return;
                     }
                     
-                    wxMessageBox(
-                        "Selected symbols: " + symbolsStr,
-                        "New Session Created",
-                        wxOK | wxICON_INFORMATION,
-                        this
-                    );
                     
-                    SetStatusText("Session created with " + std::to_string(selectedSymbols.size()) + " ticker(s)");
+                    SetStatusText("Session created successfully.");
                 }
             }
 
