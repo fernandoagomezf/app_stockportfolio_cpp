@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1.0)
+cmake_minimum_required(VERSION 4.2.0)
 
 project(spt
     VERSION 0.1.0
@@ -20,7 +20,7 @@ find_package(wxWidgets REQUIRED COMPONENTS core base OPTIONAL_COMPONENTS net gl)
 include(${wxWidgets_USE_FILE})
 
 add_executable(spt WIN32
-    # domain module
+    # domain module 
     src/spt.domain/spt.domain.ixx
     src/spt.domain/ticker.cpp
     src/spt.domain/money.cpp
