@@ -30,6 +30,10 @@ namespace spt::domain::investments {
             Money capital() const {
                 return _capital;
             }
+            
+            const map<Ticker, Company>& companies() const {
+                return _companies;
+            }
 
             void capitalize(Money amount) {
                 if (!amount.isPositive()) {
