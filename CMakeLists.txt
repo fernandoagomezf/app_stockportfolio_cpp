@@ -45,6 +45,7 @@ add_executable(spt WIN32
     src/spt.infrastructure/jsonvalue.cpp    
     src/spt.infrastructure/jsonparser.cpp    
     src/spt.infrastructure/repository.cpp
+    src/spt.infrastructure/alphavantageservice.cpp
     src/spt.infrastructure/alphavantagesearch.cpp
     src/spt.infrastructure/alphavantagefetcher.cpp
     # application module
