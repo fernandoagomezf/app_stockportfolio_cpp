@@ -22,6 +22,9 @@ namespace spt::domain::investments {
         private:
             Ticker _ticker;
             string _name;
+            string _type;
+            string _region;
+            string _currency;
             vector<Transaction> _transactions;
             stack<PricePoint> _pricePoints;
 
@@ -29,6 +32,9 @@ namespace spt::domain::investments {
             explicit Company(Ticker ticker)
                 : _ticker { ticker },
                   _name { ticker.symbol() },
+                  _type { },
+                  _region { },
+                  _currency { },
                   _transactions { },
                   _pricePoints { }
             {
@@ -36,6 +42,42 @@ namespace spt::domain::investments {
 
             Ticker ticker() const {
                 return _ticker;
+            }
+
+            string getName() const {
+                return _name;
+            }
+
+            void setName(const string& name) {
+                if (name.empty()) {
+                    _name = _ticker.symbol();
+                } else {
+                    _name = name;
+                }
+            }
+
+            string getType() const {
+                return _type;
+            }
+
+            void setType(const string& type) {
+                _type = type;
+            }
+
+            string getRegion() const {
+                return _region;
+            }
+
+            void setRegion(const string& region) {
+                _region = region;
+            }
+
+            string getCurrency() const {
+                return _currency;
+            }
+
+            void setCurrency(const string& currency) {
+                _currency = currency;
             }
 
             Money currentPrice() const {

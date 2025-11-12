@@ -13,15 +13,17 @@ import spt.infrastructure;
 import :portfoliodialog;
 
 namespace spt::application::ux {
-    using std::string;
-    using std::string_view;
-    using std::vector;
-    using std::optional;
     using std::format;
-    using std::stod;
+    using std::move;
+    using std::nullopt;
+    using std::optional;
     using std::rand;
     using std::srand;
+    using std::stod;
+    using std::string;
+    using std::string_view;
     using std::time;
+    using std::vector;
     using spt::domain::investments::Portfolio;
     using spt::domain::investments::Company;
     using spt::domain::investments::Ticker;
@@ -39,10 +41,20 @@ namespace spt::application::ux {
     };
 
     export class Window final : public wxFrame {
+        private:
+            wxPanel* _mainPanel;
+            wxSplitterWindow* _splitter;
+            wxPanel* _leftPanel;
+            wxPanel* _rightPanel;
+            wxPanel* _chartPanel;
+            wxStaticText* _capitalText;
+            wxGrid* _holdingsGrid;
+            optional<Portfolio> _portfolio;
+
         public:
             Window()
                 : wxFrame(nullptr, wxID_ANY, "Stock Portfolio Tracker"),
-                  _portfolio(std::nullopt),
+                  _portfolio(nullopt),
                   _mainPanel(nullptr),
                   _splitter(nullptr),
                   _leftPanel(nullptr),
@@ -63,19 +75,15 @@ namespace spt::application::ux {
 
         private:
             void createMainPanel() {
-                // Create main panel
                 _mainPanel = new wxPanel(this, wxID_ANY);
                 wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
                 
-                // Create splitter window
                 _splitter = new wxSplitterWindow(_mainPanel, wxID_ANY);
                 _splitter->SetMinimumPaneSize(200);
                 
-                // Left panel - Portfolio details
                 _leftPanel = new wxPanel(_splitter, wxID_ANY);
                 wxBoxSizer* leftSizer = new wxBoxSizer(wxVERTICAL);
                 
-                // Capital display
                 _capitalText = new wxStaticText(_leftPanel, wxID_ANY, "Available Capital: $0.00");
                 wxFont capitalFont = _capitalText->GetFont();
                 capitalFont.SetPointSize(12);
@@ -83,7 +91,6 @@ namespace spt::application::ux {
                 _capitalText->SetFont(capitalFont);
                 leftSizer->Add(_capitalText, 0, wxALL, 10);
                 
-                // Holdings grid
                 _holdingsGrid = new wxGrid(_leftPanel, wxID_ANY);
                 _holdingsGrid->CreateGrid(0, 5);
                 _holdingsGrid->SetColLabelValue(0, "Symbol");
@@ -98,11 +105,9 @@ namespace spt::application::ux {
                 _holdingsGrid->SetColSize(4, 120);
                 _holdingsGrid->EnableEditing(false);
                 _holdingsGrid->HideRowLabels();
-                leftSizer->Add(_holdingsGrid, 1, wxEXPAND | wxALL, 10);
-                
+                leftSizer->Add(_holdingsGrid, 1, wxEXPAND | wxALL, 10);                
                 _leftPanel->SetSizer(leftSizer);
                 
-                // Right panel - Price chart
                 _rightPanel = new wxPanel(_splitter, wxID_ANY);
                 wxBoxSizer* rightSizer = new wxBoxSizer(wxVERTICAL);
                 
@@ -113,24 +118,21 @@ namespace spt::application::ux {
                 chartTitle->SetFont(titleFont);
                 rightSizer->Add(chartTitle, 0, wxALL, 10);
                 
-                // Chart area
                 _chartPanel = new wxPanel(_rightPanel, wxID_ANY);
                 _chartPanel->SetBackgroundColour(*wxWHITE);
                 _chartPanel->Bind(wxEVT_PAINT, &Window::onPaintChart, this);
-                rightSizer->Add(_chartPanel, 1, wxEXPAND | wxALL, 10);
-                
+                rightSizer->Add(_chartPanel, 1, wxEXPAND | wxALL, 10);                
                 _rightPanel->SetSizer(rightSizer);
                 
-                // Split the window
                 _splitter->SplitVertically(_leftPanel, _rightPanel);
                 _splitter->SetSashPosition(600);
                 
                 mainSizer->Add(_splitter, 1, wxEXPAND);
                 _mainPanel->SetSizer(mainSizer);
                 
-                // Initially hide the panels until a portfolio is created
                 _splitter->Hide();
             }
+
             void createMenuBar() {
                 wxMenuBar* menuBar = new wxMenuBar();
 
@@ -165,18 +167,9 @@ namespace spt::application::ux {
                     wxArtProvider::GetBitmap(wxART_NEW, wxART_TOOLBAR),
                     "Create a new trading session"
                 );
-                
-                toolBar->AddTool(
-                    static_cast<int>(MenuId::Preferences),
-                    "Preferences",
-                    wxArtProvider::GetBitmap(wxART_HELP_SETTINGS, wxART_TOOLBAR),
-                    "Open preferences"
-                );
-
                 toolBar->Realize();
 
                 Bind(wxEVT_TOOL, &Window::onNewSession, this, static_cast<int>(MenuId::NewSession));
-                Bind(wxEVT_TOOL, &Window::onPreferences, this, static_cast<int>(MenuId::Preferences));
             }
 
             void createStatusBar() {
@@ -192,31 +185,13 @@ namespace spt::application::ux {
                 PortfolioDialog dialog(this);
                 
                 if (dialog.ShowModal() == wxID_OK) {
-                    auto opt = dialog.getPortfolio();
-                    if (!opt.has_value()) {
-                        wxMessageBox(
-                            "No portfolio was created.",
-                            "Error",
-                            wxOK | wxICON_ERROR,
-                            this
-                        );
-                        return;
-                    }
-                    
-                    _portfolio = std::move(opt.value());
-                    
-                    // Show splitter and update layout
+                    _portfolio = move(dialog.getPortfolio());                    
                     _splitter->Show();
                     _mainPanel->Layout();
                     _mainPanel->Refresh();
-                    SendSizeEvent();
-                    
-                    // Update display with portfolio data
-                    updatePortfolioDisplay();
-                    
-                    // Fetch price data from API
+                    SendSizeEvent();                    
+                    updatePortfolioDisplay();                    
                     fetchIntradayData();
-                    
                     SetStatusText("Portfolio loaded successfully.");
                 }
             }
@@ -224,59 +199,41 @@ namespace spt::application::ux {
             void updatePortfolioDisplay() {
                 if (!_portfolio.has_value()) return;
                 
-                // Update capital display
-                _capitalText->SetLabel(wxString::Format("Available Capital: $%.2f", _portfolio->capital().value()));
-                
-                // Clear existing grid
+                _capitalText->SetLabel(wxString::Format("Available Capital: $%.2f", _portfolio->capital().value()));                
                 if (_holdingsGrid->GetNumberRows() > 0) {
                     _holdingsGrid->DeleteRows(0, _holdingsGrid->GetNumberRows());
                 }
                 
-                // Populate holdings grid
-                const auto& companies = _portfolio->companies();
-                for (const auto& [ticker, company] : companies) {
+                for (const auto& company : _portfolio->companies()) {
                     _holdingsGrid->AppendRows(1);
                     int row = _holdingsGrid->GetNumberRows() - 1;
                     
-                    _holdingsGrid->SetCellValue(row, 0, wxString(ticker.symbol()));
+                    _holdingsGrid->SetCellValue(row, 0, wxString(company.ticker().symbol()));
                     _holdingsGrid->SetCellValue(row, 1, wxString::Format("%d", company.shareCount()));
                     
-                    // Get current price if available
                     if (!company.currentPrice().isZero()) {
                         _holdingsGrid->SetCellValue(row, 2, wxString::Format("$%.2f", company.currentPrice().value()));
-                        // Calculate total value
                         double totalValue = company.currentPrice().value() * company.shareCount();
                         _holdingsGrid->SetCellValue(row, 4, wxString::Format("$%.2f", totalValue));
                     } else {
                         _holdingsGrid->SetCellValue(row, 2, "$0.00");
                         _holdingsGrid->SetCellValue(row, 4, "$0.00");
-                    }
-                    
+                    }                    
                     _holdingsGrid->SetCellValue(row, 3, "0.00%");
                     
-                    // Make all cells read-only
                     for (int col = 0; col < 5; col++) {
                         _holdingsGrid->SetReadOnly(row, col);
                     }
-                }
-                
+                }                
                 _holdingsGrid->AutoSize();
             }
             
             void fetchIntradayData() {
                 if (!_portfolio.has_value()) return;
                 
-                const auto& companies = _portfolio->companies();
-                
-                if (companies.empty()) {
-                    SetStatusText("No companies to fetch data for.");
-                    return;
-                }
-                
-                SetStatusText(wxString::Format("Fetching price data for %zu companies...", companies.size()));
-                
-                for (const auto& [ticker, company] : companies) {
-                    fetchTickerData(ticker);
+                for (const auto& company : _portfolio->companies()) {
+                    SetStatusText(wxString::Format("Fetching price for %s...", wxString::FromUTF8(company.ticker().symbol())));
+                    fetchTickerData(company.ticker());
                 }
                 
                 SetStatusText("Price data loaded.");
@@ -433,15 +390,5 @@ namespace spt::application::ux {
                     this
                 );
             }
-            
-            // Member variables
-            wxPanel* _mainPanel;
-            wxSplitterWindow* _splitter;
-            wxPanel* _leftPanel;
-            wxPanel* _rightPanel;
-            wxPanel* _chartPanel;
-            wxStaticText* _capitalText;
-            wxGrid* _holdingsGrid;
-            std::optional<Portfolio> _portfolio;
     };
 }

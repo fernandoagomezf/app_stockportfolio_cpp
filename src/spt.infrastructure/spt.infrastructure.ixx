@@ -16,3 +16,5 @@ export import :jsonvalue;
 export import :jsonparser;
 // repositories infrastructure
 export import :repository;
+// services infrastructure
+export import :alphavantagesearch;

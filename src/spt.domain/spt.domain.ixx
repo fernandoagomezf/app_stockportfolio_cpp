@@ -6,4 +6,5 @@ export import :price;
 export import :pricepoint;
 export import :transaction;
 export import :company;
+export import :companysearch;
 export import :portfolio;

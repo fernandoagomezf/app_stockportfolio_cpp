@@ -4,12 +4,17 @@ import std;
 import :ticker;
 import :company;
 import :money;
+import :companysearch;
 
 namespace spt::domain::investments {
     using std::invalid_argument;
     using std::map;
     using std::move;
+    using std::runtime_error;
     using std::string;
+    using std::unique_ptr;
+    using std::views::keys;
+    using std::views::values;
     using spt::domain::investments::Ticker;
     using spt::domain::investments::Company;
     using spt::domain::investments::Money;
@@ -20,19 +25,50 @@ namespace spt::domain::investments {
             map<Ticker, Company> _companies;
 
         public:
-            void track(Ticker ticker) {
+            Portfolio()
+                : _capital { 0.0 },
+                  _companies { }
+            {
+            }
+
+            auto companies() const {
+                return _companies | values;
+            }
+
+            auto tickers() const {
+                return _companies | keys;
+            }
+
+            Company& track(Ticker ticker) {
                 if (!_companies.contains(ticker)) {
                     Company company { ticker };
                     _companies.emplace(ticker, move(company));                    
                 }
+
+                return _companies.at(ticker);
+            }
+
+            Company& track(Company company) {
+                Ticker ticker = company.ticker();
+                if (!_companies.contains(ticker)) {
+                    _companies.emplace(ticker, move(company));                    
+                }
+
+                return _companies.at(ticker);
+            }
+
+            void untrack(Ticker ticker) {
+                if (_companies.contains(ticker)) {
+                    _companies.erase(ticker);
+                }
+            }
+
+            void untrack(Company company) {
+                untrack(company.ticker());
             }
 
             Money capital() const {
                 return _capital;
-            }
-            
-            const map<Ticker, Company>& companies() const {
-                return _companies;
             }
 
             void capitalize(Money amount) {
@@ -49,9 +85,8 @@ namespace spt::domain::investments {
                     throw invalid_argument { "Number of shares to buy must be positive." };
                 }
 
-                track(ticker);                
-                Company company { _companies.at(ticker) };
-                Money cost = company.priceFor(shares);
+                Company& company { track(ticker) };
+                Money cost { company.priceFor(shares) };
                 if (cost > _capital) {
                     throw invalid_argument { "Insufficient capital to complete purchase." };
                 }
@@ -64,14 +99,12 @@ namespace spt::domain::investments {
                     throw invalid_argument { "Number of shares to sell must be positive." };
                 }
 
-                track(ticker);
-                Company company { _companies.at(ticker) };
+                Company& company { track(ticker) };
                 company.sellShares(shares);
             }
 
             void updatePrice(Ticker ticker, Price newPrice) {
-                track(ticker);
-                Company& company = _companies.at(ticker);
+                Company& company { track(ticker) };
                 company.updatePrice(newPrice);
             }
     };
