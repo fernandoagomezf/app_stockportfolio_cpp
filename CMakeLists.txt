@@ -30,6 +30,7 @@ add_executable(spt WIN32
     src/spt.domain/company.cpp
     src/spt.domain/companysearch.cpp
     src/spt.domain/portfolio.cpp
+    src/spt.domain/pricefetcher.cpp
     # infrastructure module
     src/spt.infrastructure/spt.infrastructure.ixx
     src/spt.infrastructure/value.cpp
@@ -45,6 +46,7 @@ add_executable(spt WIN32
     src/spt.infrastructure/jsonparser.cpp    
     src/spt.infrastructure/repository.cpp
     src/spt.infrastructure/alphavantagesearch.cpp
+    src/spt.infrastructure/alphavantagefetcher.cpp
     # application module
     src/spt.app/spt.app.ixx
     src/spt.app/application.cpp

@@ -138,7 +138,7 @@ namespace spt::application::ux {
                 optional<Company> company { nullopt };
                 try {
                     string term { companyName.ToStdString() };
-                    company = _searchService->searchByName(term);
+                    company = _searchService->search(term);
                 } catch (const exception& ex) {
                     wxMessageBox(
                         format("Error while searching: {}", ex.what()),
