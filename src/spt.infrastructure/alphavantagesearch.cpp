@@ -38,11 +38,11 @@ namespace spt::infrastructure::services {
                 loadSettings();
             }
 
-            optional<Company> searchBySymbol(Ticker ticker) override {
+            optional<Company> search(Ticker ticker) override {
                 return get(ticker.symbol());
             }
 
-            optional<Company> searchByName(string name) override {      
+            optional<Company> search(string name) override {      
                 return get(name);
             }
 

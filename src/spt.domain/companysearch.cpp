@@ -13,7 +13,7 @@ namespace spt::domain::investments {
         public:
             virtual ~CompanySearch() = default;
 
-            virtual optional<Company> searchBySymbol(Ticker ticker) = 0;
-            virtual optional<Company> searchByName(string name) = 0;
+            virtual optional<Company> search(Ticker ticker) = 0;
+            virtual optional<Company> search(string name) = 0;
     };
 }
