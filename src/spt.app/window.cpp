@@ -136,7 +136,6 @@ namespace spt::application::ux {
 
                 wxMenu* fileMenu = new wxMenu();
                 fileMenu->Append(static_cast<int>(MenuId::NewSession), "&New Session\tCtrl-N", "Create a new trading session");
-                fileMenu->Append(static_cast<int>(MenuId::Refresh), "&Refresh Prices\tF5", "Refresh intraday price data");
                 fileMenu->AppendSeparator();
                 fileMenu->Append(wxID_EXIT, "&Exit\tAlt-F4", "Exit the application");
                 menuBar->Append(fileMenu, "&File");
@@ -144,6 +143,10 @@ namespace spt::application::ux {
                 wxMenu* editMenu = new wxMenu();
                 editMenu->Append(static_cast<int>(MenuId::Preferences), "&Preferences\tCtrl-P", "Open preferences");
                 menuBar->Append(editMenu, "&Edit");
+                
+                wxMenu* viewMenu = new wxMenu();
+                viewMenu->Append(static_cast<int>(MenuId::Refresh), "&Refresh Prices\tF5", "Refresh intraday price data");
+                menuBar->Append(viewMenu, "&View");
 
                 wxMenu* helpMenu = new wxMenu();
                 helpMenu->Append(wxID_ABOUT, "&About\tF1", "About this application");
