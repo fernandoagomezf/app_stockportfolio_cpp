@@ -395,7 +395,6 @@ namespace spt::application::ux {
                     companyIdx++;
                 }
                 
-                // If no data to display
                 if (companiesPrices.empty() || maxDataPoints == 0) {
                     dc.SetFont(wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
                     dc.SetTextForeground(wxColour(128, 128, 128));
@@ -403,7 +402,6 @@ namespace spt::application::ux {
                     return;
                 }
                 
-                // Draw line charts for each company (each normalized to its own scale)
                 for (size_t idx = 0; idx < companiesPrices.size(); idx++) {
                     dc.SetPen(wxPen(colors[idx], 2));
                     dc.SetBrush(wxBrush(colors[idx]));
@@ -414,33 +412,28 @@ namespace spt::application::ux {
                     double companyMin = companiesMinMax[idx].first;
                     double companyMax = companiesMinMax[idx].second;
                     
-                    // Add padding to this company's range
                     double priceRange = companyMax - companyMin;
-                    if (priceRange < 0.01) priceRange = 1.0; // Avoid division by zero
+                    if (priceRange < 0.01) priceRange = 1.0; // avoid division by zero
                     companyMin -= priceRange * 0.1;
                     companyMax += priceRange * 0.1;
                     
-                    // Draw line chart (only if we have multiple points)
                     if (numPoints > 1 && maxDataPoints > 1) {
                         for (int i = 0; i < numPoints - 1; i++) {
                             int x1 = marginLeft + (chartWidth * i) / (maxDataPoints - 1);
                             int x2 = marginLeft + (chartWidth * (i + 1)) / (maxDataPoints - 1);
                             
-                            // Normalize each company to use full chart height
                             int y1 = marginTop + chartHeight - (int)((prices[i] - companyMin) / (companyMax - companyMin) * chartHeight);
                             int y2 = marginTop + chartHeight - (int)((prices[i + 1] - companyMin) / (companyMax - companyMin) * chartHeight);
                             
                             dc.DrawLine(x1, y1, x2, y2);
                         }
                     } else if (numPoints == 1) {
-                        // Single point - draw a dot
                         int x = marginLeft + chartWidth / 2;
                         int y = marginTop + chartHeight - (int)((prices[0] - companyMin) / (companyMax - companyMin) * chartHeight);
                         dc.DrawCircle(x, y, 3);
                     }
                 }
                 
-                // Draw legend with price ranges
                 dc.SetFont(wxFont(9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
                 int legendY = marginTop + 10;
                 for (size_t i = 0; i < companiesPrices.size(); i++) {
@@ -449,7 +442,6 @@ namespace spt::application::ux {
                     dc.DrawLine(marginLeft + 10, legendY, marginLeft + 30, legendY);
                     dc.SetTextForeground(*wxBLACK);
                     
-                    // Show company name with price range
                     double minPrice = companiesMinMax[i].first;
                     double maxPrice = companiesMinMax[i].second;
                     wxString label = wxString::Format("%s ($%.2f - $%.2f)", 
@@ -458,14 +450,11 @@ namespace spt::application::ux {
                     legendY += 20;
                 }
                 
-                // Draw axis labels
                 dc.SetFont(wxFont(8, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
                 dc.SetTextForeground(*wxBLACK);
                 
-                // Y-axis label (normalized scale, no specific prices)
                 dc.DrawText("Price (normalized)", 5, marginTop - 10);
                 
-                // X-axis labels (timestamps)
                 if (!timestamps.empty() && maxDataPoints > 0) {
                     auto formatTime = [](system_clock::time_point tp) -> wxString {
                         auto timeT = system_clock::to_time_t(tp);
@@ -475,23 +464,18 @@ namespace spt::application::ux {
                     };
                     
                     if (maxDataPoints == 1) {
-                        // Single point - show in center
                         wxString timeStr = formatTime(timestamps[0]);
                         int x = marginLeft + chartWidth / 2;
                         dc.DrawText(timeStr, x - 15, marginTop + chartHeight + 5);
                     } else {
-                        // Multiple points - show left, middle, right
-                        // Left-most point
                         wxString leftTime = formatTime(timestamps[0]);
                         dc.DrawText(leftTime, marginLeft - 15, marginTop + chartHeight + 5);
                         
-                        // Middle point
                         int midIdx = timestamps.size() / 2;
                         wxString midTime = formatTime(timestamps[midIdx]);
                         int midX = marginLeft + chartWidth / 2;
                         dc.DrawText(midTime, midX - 15, marginTop + chartHeight + 5);
                         
-                        // Right-most point
                         wxString rightTime = formatTime(timestamps[timestamps.size() - 1]);
                         int rightX = marginLeft + chartWidth;
                         dc.DrawText(rightTime, rightX - 30, marginTop + chartHeight + 5);
