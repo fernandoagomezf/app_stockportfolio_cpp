@@ -14,6 +14,9 @@ namespace spt::infrastructure::services {
     using std::chrono::system_clock;
     using std::format;
     using std::string;
+    using std::views::filter;
+    using std::views::transform;
+    using std::views::zip;
     using spt::domain::investments::Company;
     using spt::domain::investments::Portfolio;
     using spt::domain::investments::PriceFetcher;
@@ -75,22 +78,24 @@ namespace spt::infrastructure::services {
                 const auto& timestamps = result["timestamp"].getArray();
                 const auto& prices = result["indicators"]["quote"][0]["close"].getArray();
                 
-                // Get the latest timestamp we already have
                 auto latestTimestamp = company.latestPriceTimestamp();
                 
-                // Only add price points with timestamps newer than what we have
-                for (size_t i = 0; i < prices.size() && i < timestamps.size(); i++) {
-                    if (prices[i].isNumber() && timestamps[i].isNumber()) {
-                        auto timestamp = system_clock::from_time_t(static_cast<time_t>(timestamps[i].getNumber()));
-                        
-                        // Only add if this timestamp is newer than the latest we have
-                        if (timestamp > latestTimestamp) {
-                            company.updatePrice(
-                                timestamp,
-                                Price { Money { prices[i].getNumber() } }
-                            );
-                        }
-                    }
+                auto priceData = zip(timestamps, prices)
+                    | filter([](const auto& pair) {
+                        const auto& [ts, price] = pair;
+                        return ts.isNumber() && price.isNumber();
+                    })
+                    | transform([&latestTimestamp](const auto& pair) {
+                        const auto& [ts, price] = pair;
+                        auto timestamp = system_clock::from_time_t(static_cast<time_t>(ts.getNumber()));
+                        return std::make_tuple(timestamp, price.getNumber(), timestamp > latestTimestamp);
+                    })
+                    | filter([](const auto& tuple) {
+                        return std::get<2>(tuple); // only new timestamps
+                    });
+                
+                for (const auto& [timestamp, priceValue, _] : priceData) {
+                    company.updatePrice(timestamp, Price { Money { priceValue } });
                 }
             }
     };
