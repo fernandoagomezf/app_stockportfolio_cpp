@@ -1,4 +1,4 @@
-export module spt.infrastructure:alphavantageservice;
+export module spt.infrastructure:restservice;
 
 import std;
 import :httpclient;
@@ -20,34 +20,41 @@ namespace spt::infrastructure::services {
     using spt::infrastructure::text::JsonParser;
     using spt::infrastructure::text::JsonValue;
 
-    export class AlphaVantageService {
+    export class RestService {
         private:
-            string _baseUrl;
-            string _apiKey;
+            string _userAgent;
+            string _accept;
 
         public:
-            AlphaVantageService()
-                : _baseUrl { },
-                  _apiKey { } 
+            RestService()
+                : _userAgent { "Blendwerk SPT/1.0" },
+                  _accept { "application/json" }
             {
-                loadSettings();
             }
 
-            virtual ~AlphaVantageService() = default;            
+            string getAccept() const {
+                return _accept;
+            }
+
+            string getUserAgent() const {
+                return _userAgent;
+            }
+
+            virtual ~RestService() = default;            
             
         protected:
-            string getApiKey() const {
-                return _apiKey;
+            void setAccept(const string& accept) {
+                _accept = accept;
             }
 
-            string getBaseUrl() const {
-                return _baseUrl;
+            void setUserAgent(const string& userAgent) {
+                _userAgent = userAgent;
             }
 
             JsonValue fetchData(string url) {
                 HttpRequest request { url, HttpMethod::GET };
-                request.setHeader("Accept", "application/json");
-                request.setHeader("User-Agent", "Blendwerk SPT/1.0");
+                request.setHeader("Accept", _accept);
+                request.setHeader("User-Agent", _userAgent);
 
                 HttpClient client { };
                 client.timeout(10L);
@@ -55,20 +62,16 @@ namespace spt::infrastructure::services {
                 HttpResponse response { client.send(request) };
                 if (!response.isSuccess()) {
                     throw runtime_error {
-                        format("Failed to fetch data from Alpha Vantage Service: status code {0}", response.status())
+                        format("Failed to fetch data from REST Service: status code {0}", response.status())
                     };
                 }
 
                 JsonValue json { JsonParser::parse(response.body()) };                    
                 if (!json.isObject()) {
-                    throw runtime_error { "Invalid response from Alpha Vantage." };
+                    throw runtime_error { "Invalid response from REST Service." };
                 }
-            }
 
-        private:
-            void loadSettings() {
-                _baseUrl = "https://www.alphavantage.co/query?";
-                _apiKey = "2SACRS4UK8QY45Z9";
+                return json;
             }
     };
 }

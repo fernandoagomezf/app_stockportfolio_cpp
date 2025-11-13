@@ -118,7 +118,7 @@ namespace spt::infrastructure::text {
             const JsonValue& operator[](const string& key) const {
                 if (!isObject()) {
                     throw out_of_range{"Indexing operator[] called on non-object JsonValue"};
-                }
+                }                    
                 return getObject().at(key);
             }
 

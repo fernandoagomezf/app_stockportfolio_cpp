@@ -21,10 +21,11 @@ namespace spt::domain::investments {
     export class Company final {
         private:
             Ticker _ticker;
+            string _exchange;
             string _name;
             string _type;
-            string _region;
-            string _currency;
+            string _sector;
+            string _industry;
             vector<Transaction> _transactions;
             stack<PricePoint> _pricePoints;
 
@@ -33,15 +34,23 @@ namespace spt::domain::investments {
                 : _ticker { ticker },
                   _name { ticker.symbol() },
                   _type { },
-                  _region { },
-                  _currency { },
                   _transactions { },
-                  _pricePoints { }
+                  _pricePoints { },
+                  _exchange { },
+                  _sector { }
             {
             }
 
             Ticker ticker() const {
                 return _ticker;
+            }
+
+            string getExchange() const {
+                return _exchange;
+            }
+
+            void setExchange(const string& exchange) {
+                _exchange = exchange;
             }
 
             string getName() const {
@@ -64,20 +73,20 @@ namespace spt::domain::investments {
                 _type = type;
             }
 
-            string getRegion() const {
-                return _region;
+            string getSector() const {
+                return _sector;
             }
 
-            void setRegion(const string& region) {
-                _region = region;
+            void setSector(const string& sector) {
+                _sector = sector;
             }
 
-            string getCurrency() const {
-                return _currency;
+            string getIndustry() const {
+                return _industry;
             }
 
-            void setCurrency(const string& currency) {
-                _currency = currency;
+            void setIndustry(const string& industry) {
+                _industry = industry;
             }
 
             Money currentPrice() const {

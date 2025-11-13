@@ -29,7 +29,7 @@ namespace spt::application::ux {
     using spt::infrastructure::net::HttpMethod;
     using spt::infrastructure::text::JsonValue;
     using spt::infrastructure::text::JsonParser;
-    using spt::infrastructure::services::AlphaVantageSearch;
+    using spt::infrastructure::services::YahooCompanySearch;
 
     export class PortfolioDialog final : public wxDialog {
         private:
@@ -42,7 +42,7 @@ namespace spt::application::ux {
         public:
             PortfolioDialog(wxWindow* parent)
                 : wxDialog(parent, wxID_ANY, "Portfolio Information", wxDefaultPosition, wxSize(750, 600)),
-                  _searchService { make_unique<AlphaVantageSearch>() }
+                  _searchService { make_unique<YahooCompanySearch>() }
             {
                 createControls();
                 Centre();
@@ -84,8 +84,8 @@ namespace spt::application::ux {
                 _grid->SetColLabelValue(0, "Symbol");
                 _grid->SetColLabelValue(1, "Name");
                 _grid->SetColLabelValue(2, "Type");
-                _grid->SetColLabelValue(3, "Region");
-                _grid->SetColLabelValue(4, "Currency");
+                _grid->SetColLabelValue(3, "Sector");
+                _grid->SetColLabelValue(4, "Industry");
                 _grid->SetColSize(0, 100);
                 _grid->SetColSize(1, 250);
                 _grid->SetColSize(2, 120);
@@ -170,8 +170,8 @@ namespace spt::application::ux {
                 _grid->SetCellValue(row, 0, company.ticker().symbol());
                 _grid->SetCellValue(row, 1, company.getName());
                 _grid->SetCellValue(row, 2, company.getType());
-                _grid->SetCellValue(row, 3, company.getRegion());
-                _grid->SetCellValue(row, 4, company.getCurrency());
+                _grid->SetCellValue(row, 3, company.getSector());
+                _grid->SetCellValue(row, 4, company.getIndustry());
                 
                 for (int col = 0; col < 5; ++col) {
                     _grid->SetReadOnly(row, col);

@@ -1,4 +1,4 @@
-export module spt.infrastructure:alphavantagefetcher;
+export module spt.infrastructure:yahoopricefetcher;
 
 import std;
 import spt.domain;
@@ -7,15 +7,15 @@ import :httprequest;
 import :httpresponse;
 import :jsonvalue;
 import :jsonparser;
-import :alphavantageservice;
+import :restservice;
 
 namespace spt::infrastructure::services {
     using spt::domain::investments::Company;
     using spt::domain::investments::Portfolio;
     using spt::domain::investments::PriceFetcher;
-    using spt::infrastructure::services::AlphaVantageService;
+    using spt::infrastructure::services::RestService;
 
-    export class AlphaVantageFetcher final : public AlphaVantageService, public PriceFetcher {
+    export class AlphaVantageFetcher final : public RestService, public PriceFetcher {
         public:
 
             void fetch(Company& company) override {
