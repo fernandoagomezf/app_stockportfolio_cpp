@@ -67,6 +67,9 @@ namespace spt::application::ux {
                 createStatusBar();
                 createMainPanel();
                 
+                // Bind resize event to adjust grid columns
+                Bind(wxEVT_SIZE, &Window::onResize, this);
+                
                 Maximize();
             }
 
@@ -95,13 +98,9 @@ namespace spt::application::ux {
                 _holdingsGrid->SetColLabelValue(2, "Current Price");
                 _holdingsGrid->SetColLabelValue(3, "Gain/Loss");
                 _holdingsGrid->SetColLabelValue(4, "Total Value");
-                _holdingsGrid->SetColSize(0, 100);
-                _holdingsGrid->SetColSize(1, 80);
-                _holdingsGrid->SetColSize(2, 120);
-                _holdingsGrid->SetColSize(3, 120);
-                _holdingsGrid->SetColSize(4, 120);
                 _holdingsGrid->EnableEditing(false);
                 _holdingsGrid->HideRowLabels();
+                _holdingsGrid->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
                 leftSizer->Add(_holdingsGrid, 1, wxEXPAND | wxALL, 10);                
                 _leftPanel->SetSizer(leftSizer);
                 
@@ -235,8 +234,10 @@ namespace spt::application::ux {
                     for (int col = 0; col < 5; col++) {
                         _holdingsGrid->SetReadOnly(row, col);
                     }
-                }                
-                _holdingsGrid->AutoSize();
+                }
+                
+                // Size columns proportionally to fill available width
+                resizeGridColumns();
             }
             
             void fetchIntradayData() {
@@ -252,6 +253,24 @@ namespace spt::application::ux {
                 }
                 
                 updatePortfolioDisplay();
+            }
+            
+            void resizeGridColumns() {
+                if (!_holdingsGrid) return;
+                
+                int gridWidth = _holdingsGrid->GetClientSize().GetWidth();
+                if (gridWidth > 100) {
+                    _holdingsGrid->SetColSize(0, static_cast<int>(gridWidth * 0.15)); // Symbol: 15%
+                    _holdingsGrid->SetColSize(1, static_cast<int>(gridWidth * 0.12)); // Shares: 12%
+                    _holdingsGrid->SetColSize(2, static_cast<int>(gridWidth * 0.20)); // Current Price: 20%
+                    _holdingsGrid->SetColSize(3, static_cast<int>(gridWidth * 0.18)); // Gain/Loss: 18%
+                    _holdingsGrid->SetColSize(4, static_cast<int>(gridWidth * 0.20)); // Total Value: 20%
+                }
+            }
+            
+            void onResize(wxSizeEvent& event) {
+                resizeGridColumns();
+                event.Skip(); // Important: allow default processing
             }
 
             void onRefresh(wxCommandEvent& event) {
