@@ -30,7 +30,7 @@ namespace spt::infrastructure::services {
             YahooPriceFetcher()
                 : RestService(),
                   _url { "https://query1.finance.yahoo.com/v8/finance/chart" },
-                  _interval { "5m" },
+                  _interval { "1m" },
                   _range { "1d" }
             {
             }

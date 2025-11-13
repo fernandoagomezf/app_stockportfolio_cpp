@@ -109,6 +109,18 @@ namespace spt::domain::investments {
                 _pricePoints.emplace(newPrice);
             }
 
+            vector<PricePoint> priceHistory() const {
+                vector<PricePoint> history;
+                stack<PricePoint> temp = _pricePoints;
+                while (!temp.empty()) {
+                    history.push_back(temp.top());
+                    temp.pop();
+                }
+                // Reverse to get chronological order (oldest first)
+                std::ranges::reverse(history);
+                return history;
+            }
+
             int sharesBought() const {
                 auto bought = _transactions
                     | filter([](const auto& tx) { return tx.isBuying(); })

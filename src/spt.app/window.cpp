@@ -260,6 +260,12 @@ namespace spt::application::ux {
                 }
                 
                 updatePortfolioDisplay();
+                
+                // Trigger chart repaint
+                if (_chartPanel) {
+                    _chartPanel->Refresh();
+                    _chartPanel->Update();
+                }
             }
             
             void resizeGridColumns() {
@@ -323,6 +329,14 @@ namespace spt::application::ux {
                 
                 if (chartWidth <= 0 || chartHeight <= 0) return;
                 
+                // If no portfolio, show message
+                if (!_portfolio.has_value()) {
+                    dc.SetFont(wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+                    dc.SetTextForeground(wxColour(128, 128, 128));
+                    dc.DrawText("No portfolio data to display", width / 2 - 100, height / 2);
+                    return;
+                }
+                
                 // Draw axes
                 dc.SetPen(wxPen(*wxBLACK, 2));
                 dc.DrawLine(marginLeft, marginTop, marginLeft, marginTop + chartHeight); // Y-axis
@@ -335,51 +349,97 @@ namespace spt::application::ux {
                     dc.DrawLine(marginLeft, y, marginLeft + chartWidth, y);
                 }
                 
-                // Generate dummy data for 3 companies
+                // Collect companies and their price histories
                 vector<wxColour> colors = {
                     wxColour(255, 0, 0),    // Red
                     wxColour(0, 128, 255),  // Blue
-                    wxColour(0, 200, 0)     // Green
+                    wxColour(0, 200, 0),    // Green
+                    wxColour(255, 128, 0),  // Orange
+                    wxColour(128, 0, 255),  // Purple
+                    wxColour(0, 200, 200)   // Cyan
                 };
                 
-                vector<string> companyNames = { "Company A", "Company B", "Company C" };
+                vector<string> companyNames;
+                vector<vector<double>> companiesPrices;
+                double globalMinPrice = std::numeric_limits<double>::max();
+                double globalMaxPrice = std::numeric_limits<double>::lowest();
+                int maxDataPoints = 0;
                 
-                int numPoints = 20;
-                
-                for (size_t companyIdx = 0; companyIdx < 3; companyIdx++) {
-                    dc.SetPen(wxPen(colors[companyIdx], 2));
+                size_t companyIdx = 0;
+                for (const auto& company : _portfolio->companies()) {
+                    if (companyIdx >= colors.size()) break; // Limit to available colors
                     
-                    // Generate dummy price data
+                    auto history = company.priceHistory();
+                    if (history.empty()) continue; // Skip companies with no price data
+                    
+                    companyNames.push_back(company.getName());
+                    
                     vector<double> prices;
-                    double basePrice = 100.0 + (companyIdx * 20.0);
-                    
-                    for (int i = 0; i < numPoints; i++) {
-                        // Create some variation
-                        double variation = (rand() % 20 - 10) * 0.5;
-                        prices.push_back(basePrice + variation + (i * 0.5));
+                    for (const auto& point : history) {
+                        double priceValue = point.price().amount().value();
+                        prices.push_back(priceValue);
+                        globalMinPrice = std::min(globalMinPrice, priceValue);
+                        globalMaxPrice = std::max(globalMaxPrice, priceValue);
                     }
                     
-                    // Find min/max for scaling
-                    double minPrice = 80.0;
-                    double maxPrice = 160.0;
+                    companiesPrices.push_back(prices);
+                    maxDataPoints = std::max(maxDataPoints, static_cast<int>(prices.size()));
+                    companyIdx++;
+                }
+                
+                // If no data to display
+                if (companiesPrices.empty() || maxDataPoints == 0) {
+                    dc.SetFont(wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+                    dc.SetTextForeground(wxColour(128, 128, 128));
+                    dc.DrawText("No price data available", width / 2 - 80, height / 2);
+                    return;
+                }
+                
+                // Add some padding to min/max
+                double priceRange = globalMaxPrice - globalMinPrice;
+                if (priceRange < 0.01) priceRange = 1.0; // Avoid division by zero
+                globalMinPrice -= priceRange * 0.1;
+                globalMaxPrice += priceRange * 0.1;
+                
+                // Draw line charts for each company
+                for (size_t idx = 0; idx < companiesPrices.size(); idx++) {
+                    dc.SetPen(wxPen(colors[idx], 2));
+                    dc.SetBrush(wxBrush(colors[idx]));
                     
-                    // Draw line chart
-                    for (int i = 0; i < numPoints - 1; i++) {
-                        int x1 = marginLeft + (chartWidth * i) / (numPoints - 1);
-                        int x2 = marginLeft + (chartWidth * (i + 1)) / (numPoints - 1);
-                        
-                        // Invert Y because screen coordinates are top-down
-                        int y1 = marginTop + chartHeight - (int)((prices[i] - minPrice) / (maxPrice - minPrice) * chartHeight);
-                        int y2 = marginTop + chartHeight - (int)((prices[i + 1] - minPrice) / (maxPrice - minPrice) * chartHeight);
-                        
-                        dc.DrawLine(x1, y1, x2, y2);
+                    const auto& prices = companiesPrices[idx];
+                    int numPoints = static_cast<int>(prices.size());
+                    
+                    // Draw line chart (only if we have multiple points)
+                    if (numPoints > 1 && maxDataPoints > 1) {
+                        for (int i = 0; i < numPoints - 1; i++) {
+                            int x1 = marginLeft + (chartWidth * i) / (maxDataPoints - 1);
+                            int x2 = marginLeft + (chartWidth * (i + 1)) / (maxDataPoints - 1);
+                            
+                            // Invert Y because screen coordinates are top-down
+                            int y1 = marginTop + chartHeight - (int)((prices[i] - globalMinPrice) / (globalMaxPrice - globalMinPrice) * chartHeight);
+                            int y2 = marginTop + chartHeight - (int)((prices[i + 1] - globalMinPrice) / (globalMaxPrice - globalMinPrice) * chartHeight);
+                            
+                            dc.DrawLine(x1, y1, x2, y2);
+                        }
+                    }
+                    
+                    // Draw dots at each price point
+                    for (int i = 0; i < numPoints; i++) {
+                        int x;
+                        if (maxDataPoints > 1) {
+                            x = marginLeft + (chartWidth * i) / (maxDataPoints - 1);
+                        } else {
+                            x = marginLeft + chartWidth / 2; // Center single point
+                        }
+                        int y = marginTop + chartHeight - (int)((prices[i] - globalMinPrice) / (globalMaxPrice - globalMinPrice) * chartHeight);
+                        dc.DrawCircle(x, y, 3);
                     }
                 }
                 
                 // Draw legend
                 dc.SetFont(wxFont(9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
                 int legendY = marginTop + 10;
-                for (size_t i = 0; i < 3; i++) {
+                for (size_t i = 0; i < companiesPrices.size(); i++) {
                     dc.SetPen(wxPen(colors[i], 2));
                     dc.SetBrush(wxBrush(colors[i]));
                     dc.DrawLine(marginLeft + 10, legendY, marginLeft + 30, legendY);
@@ -395,8 +455,8 @@ namespace spt::application::ux {
                 // Y-axis labels (prices)
                 for (int i = 0; i <= 5; i++) {
                     int y = marginTop + (chartHeight * i) / 5;
-                    double price = 160.0 - (80.0 * i) / 5;
-                    dc.DrawText(wxString::Format("$%.0f", price), 10, y - 8);
+                    double price = globalMaxPrice - ((globalMaxPrice - globalMinPrice) * i) / 5;
+                    dc.DrawText(wxString::Format("$%.2f", price), 10, y - 8);
                 }
                 
                 // X-axis label
