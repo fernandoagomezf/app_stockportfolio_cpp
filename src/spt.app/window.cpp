@@ -352,12 +352,21 @@ namespace spt::application::ux {
                 }
                 
                 vector<wxColour> colors = {
-                    wxColour(255, 0, 0),    // Red
-                    wxColour(0, 128, 255),  // Blue
-                    wxColour(0, 200, 0),    // Green
-                    wxColour(255, 128, 0),  // Orange
-                    wxColour(128, 0, 255),  // Purple
-                    wxColour(0, 200, 200)   // Cyan
+                    wxColour(255, 0, 0),      // Red
+                    wxColour(0, 128, 255),    // Blue
+                    wxColour(0, 200, 0),      // Green
+                    wxColour(255, 128, 0),    // Orange
+                    wxColour(128, 0, 255),    // Purple
+                    wxColour(0, 200, 200),    // Cyan
+                    wxColour(255, 0, 128),    // Pink
+                    wxColour(128, 128, 0),    // Olive
+                    wxColour(0, 128, 128),    // Teal
+                    wxColour(255, 192, 0),    // Gold
+                    wxColour(192, 0, 192),    // Magenta
+                    wxColour(64, 128, 255),   // Light Blue
+                    wxColour(255, 64, 0),     // Red-Orange
+                    wxColour(128, 255, 0),    // Lime
+                    wxColour(0, 64, 128)      // Navy
                 };
                 
                 vector<string> companyNames;
@@ -434,21 +443,30 @@ namespace spt::application::ux {
                     }
                 }
                 
-                // Draw legend with price ranges below the chart
+                // Draw legend with price ranges below the chart in 3 columns
                 dc.SetFont(wxFont(9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-                int legendY = marginTop + chartHeight + 35;
+                int legendStartY = marginTop + chartHeight + 35;
+                int columnWidth = chartWidth / 3;
+                
                 for (size_t i = 0; i < companiesPrices.size(); i++) {
+                    int column = i / 5; // 5 items per column
+                    int row = i % 5;
+                    
+                    if (column >= 3) break; // Max 3 columns (15 items)
+                    
+                    int legendX = marginLeft + (column * columnWidth);
+                    int legendY = legendStartY + (row * 20);
+                    
                     dc.SetPen(wxPen(colors[i], 2));
                     dc.SetBrush(wxBrush(colors[i]));
-                    dc.DrawLine(marginLeft + 10, legendY, marginLeft + 30, legendY);
+                    dc.DrawLine(legendX + 10, legendY, legendX + 30, legendY);
                     dc.SetTextForeground(*wxBLACK);
                     
                     double minPrice = companiesMinMax[i].first;
                     double maxPrice = companiesMinMax[i].second;
                     wxString label = wxString::Format("%s ($%.2f - $%.2f)", 
                         companyNames[i].c_str(), minPrice, maxPrice);
-                    dc.DrawText(label, marginLeft + 35, legendY - 5);
-                    legendY += 20;
+                    dc.DrawText(label, legendX + 35, legendY - 5);
                 }
                 
                 dc.SetFont(wxFont(8, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
