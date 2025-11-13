@@ -6,9 +6,11 @@ import :transaction;
 import :pricepoint;
 
 namespace spt::domain::investments {
+    using std::chrono::system_clock;
     using std::invalid_argument;
     using std::plus;
     using std::ranges::fold_left;
+    using std::ranges::reverse;
     using std::stack;
     using std::string;
     using std::vector;
@@ -109,6 +111,10 @@ namespace spt::domain::investments {
                 _pricePoints.emplace(newPrice);
             }
 
+            void updatePrice(system_clock::time_point timestamp, Price newPrice) {
+                _pricePoints.emplace(timestamp, newPrice);
+            }
+
             vector<PricePoint> priceHistory() const {
                 vector<PricePoint> history;
                 stack<PricePoint> temp = _pricePoints;
@@ -116,8 +122,8 @@ namespace spt::domain::investments {
                     history.push_back(temp.top());
                     temp.pop();
                 }
-                // Reverse to get chronological order (oldest first)
-                std::ranges::reverse(history);
+                
+                reverse(history);
                 return history;
             }
 

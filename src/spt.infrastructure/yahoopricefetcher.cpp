@@ -10,6 +10,8 @@ import :jsonparser;
 import :restservice;
 
 namespace spt::infrastructure::services {
+    using std::chrono::seconds;
+    using std::chrono::system_clock;
     using std::format;
     using std::string;
     using spt::domain::investments::Company;
@@ -69,12 +71,16 @@ namespace spt::infrastructure::services {
                 };
 
                 JsonValue json { fetchData(url) };
-                const auto& prices = json["chart"]["result"][0]["indicators"]["quote"][0]["close"].getArray();
-                if (!prices.empty()) {
-                    auto price = prices.back();
-                    if (price.isNumber()) {
+                const auto& result = json["chart"]["result"][0];
+                const auto& timestamps = result["timestamp"].getArray();
+                const auto& prices = result["indicators"]["quote"][0]["close"].getArray();
+                
+                for (size_t i = 0; i < prices.size() && i < timestamps.size(); i++) {
+                    if (prices[i].isNumber() && timestamps[i].isNumber()) {
+                        auto timestamp = system_clock::from_time_t(static_cast<time_t>(timestamps[i].getNumber()));
                         company.updatePrice(
-                            Price { Money { price.getNumber() } }
+                            timestamp,
+                            Price { Money { prices[i].getNumber() } }
                         );
                     }
                 }
