@@ -328,7 +328,7 @@ namespace spt::application::ux {
                 int marginLeft = 60;
                 int marginRight = 20;
                 int marginTop = 20;
-                int marginBottom = 40;
+                int marginBottom = 140; // Increased to make room for timestamps and legend
                 
                 int chartWidth = width - marginLeft - marginRight;
                 int chartHeight = height - marginTop - marginBottom;
@@ -434,8 +434,9 @@ namespace spt::application::ux {
                     }
                 }
                 
+                // Draw legend with price ranges below the chart
                 dc.SetFont(wxFont(9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-                int legendY = marginTop + 10;
+                int legendY = marginTop + chartHeight + 35;
                 for (size_t i = 0; i < companiesPrices.size(); i++) {
                     dc.SetPen(wxPen(colors[i], 2));
                     dc.SetBrush(wxBrush(colors[i]));
@@ -466,19 +467,19 @@ namespace spt::application::ux {
                     if (maxDataPoints == 1) {
                         wxString timeStr = formatTime(timestamps[0]);
                         int x = marginLeft + chartWidth / 2;
-                        dc.DrawText(timeStr, x - 15, marginTop + chartHeight + 5);
+                        dc.DrawText(timeStr, x - 15, marginTop + chartHeight + 20);
                     } else {
                         wxString leftTime = formatTime(timestamps[0]);
-                        dc.DrawText(leftTime, marginLeft - 15, marginTop + chartHeight + 5);
+                        dc.DrawText(leftTime, marginLeft - 15, marginTop + chartHeight + 20);
                         
                         int midIdx = timestamps.size() / 2;
                         wxString midTime = formatTime(timestamps[midIdx]);
                         int midX = marginLeft + chartWidth / 2;
-                        dc.DrawText(midTime, midX - 15, marginTop + chartHeight + 5);
+                        dc.DrawText(midTime, midX - 15, marginTop + chartHeight + 20);
                         
                         wxString rightTime = formatTime(timestamps[timestamps.size() - 1]);
                         int rightX = marginLeft + chartWidth;
-                        dc.DrawText(rightTime, rightX - 30, marginTop + chartHeight + 5);
+                        dc.DrawText(rightTime, rightX - 30, marginTop + chartHeight + 20);
                     }
                 }
             }
