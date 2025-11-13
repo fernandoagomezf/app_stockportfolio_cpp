@@ -14,16 +14,21 @@ import :portfoliodialog;
 
 namespace spt::application::ux {
     using std::chrono::system_clock;
+    using std::exception;
     using std::format;
+    using std::max;
+    using std::min;
     using std::move;
     using std::nullopt;
     using std::numeric_limits;
     using std::optional;
+    using std::pair;
     using std::rand;
     using std::srand;
     using std::string;
     using std::string_view;
     using std::time;
+    using std::tm;
     using std::vector;
     using spt::domain::investments::Portfolio;
     using spt::domain::investments::Company;
@@ -69,7 +74,6 @@ namespace spt::application::ux {
                 createStatusBar();
                 createMainPanel();
                 
-                // Bind resize event to adjust grid columns
                 Bind(wxEVT_SIZE, &Window::onResize, this);
                 
                 Maximize();
@@ -245,7 +249,6 @@ namespace spt::application::ux {
                     }
                 }
                 
-                // Size columns proportionally to fill available width
                 resizeGridColumns();
             }
             
@@ -257,13 +260,15 @@ namespace spt::application::ux {
                 try {
                     _priceFetcher.fetch(_portfolio.value());
                     SetStatusText("Price data loaded.");
-                } catch (const std::exception& ex) {
+                } catch (const exception& ex) {
                     SetStatusText(wxString::Format("Error fetching prices: %s", ex.what()));
                 }
                 
                 updatePortfolioDisplay();
-                
-                // Trigger chart repaint
+                repaintChart();                
+            }
+
+            void repaintChart() {
                 if (_chartPanel) {
                     _chartPanel->Refresh();
                     _chartPanel->Update();
@@ -275,7 +280,7 @@ namespace spt::application::ux {
                 
                 int gridWidth = _holdingsGrid->GetClientSize().GetWidth();
                 if (gridWidth > 100) {
-                    _holdingsGrid->SetColSize(0, static_cast<int>(gridWidth * 0.11)); // Symbol: 10%
+                    _holdingsGrid->SetColSize(0, static_cast<int>(gridWidth * 0.11)); // Symbol: 11%
                     _holdingsGrid->SetColSize(1, static_cast<int>(gridWidth * 0.25)); // Company Name: 25%
                     _holdingsGrid->SetColSize(2, static_cast<int>(gridWidth * 0.12)); // Exchange: 12%
                     _holdingsGrid->SetColSize(3, static_cast<int>(gridWidth * 0.08)); // Shares: 8%
@@ -287,7 +292,7 @@ namespace spt::application::ux {
             
             void onResize(wxSizeEvent& event) {
                 resizeGridColumns();
-                event.Skip(); // Important: allow default processing
+                event.Skip(); // allow default processing
             }
 
             void onRefresh(wxCommandEvent& event) {
@@ -320,7 +325,6 @@ namespace spt::application::ux {
                 int width = size.GetWidth();
                 int height = size.GetHeight();
                 
-                // Define margins
                 int marginLeft = 60;
                 int marginRight = 20;
                 int marginTop = 20;
@@ -329,9 +333,7 @@ namespace spt::application::ux {
                 int chartWidth = width - marginLeft - marginRight;
                 int chartHeight = height - marginTop - marginBottom;
                 
-                if (chartWidth <= 0 || chartHeight <= 0) return;
-                
-                // If no portfolio, show message
+                if (chartWidth <= 0 || chartHeight <= 0) return;                
                 if (!_portfolio.has_value()) {
                     dc.SetFont(wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
                     dc.SetTextForeground(wxColour(128, 128, 128));
@@ -339,19 +341,16 @@ namespace spt::application::ux {
                     return;
                 }
                 
-                // Draw axes
                 dc.SetPen(wxPen(*wxBLACK, 2));
                 dc.DrawLine(marginLeft, marginTop, marginLeft, marginTop + chartHeight); // Y-axis
                 dc.DrawLine(marginLeft, marginTop + chartHeight, marginLeft + chartWidth, marginTop + chartHeight); // X-axis
                 
-                // Draw grid lines
                 dc.SetPen(wxPen(wxColour(220, 220, 220), 1));
                 for (int i = 1; i < 5; i++) {
                     int y = marginTop + (chartHeight * i) / 5;
                     dc.DrawLine(marginLeft, y, marginLeft + chartWidth, y);
                 }
                 
-                // Collect companies and their price histories
                 vector<wxColour> colors = {
                     wxColour(255, 0, 0),    // Red
                     wxColour(0, 128, 255),  // Blue
@@ -363,9 +362,8 @@ namespace spt::application::ux {
                 
                 vector<string> companyNames;
                 vector<vector<double>> companiesPrices;
+                vector<pair<double, double>> companiesMinMax; // store min/max for each company
                 vector<system_clock::time_point> timestamps;
-                double globalMinPrice = numeric_limits<double>::max();
-                double globalMaxPrice = numeric_limits<double>::lowest();
                 int maxDataPoints = 0;
                 
                 size_t companyIdx = 0;
@@ -378,20 +376,22 @@ namespace spt::application::ux {
                     companyNames.push_back(company.getName());
                     
                     vector<double> prices;
+                    double companyMinPrice = numeric_limits<double>::max();
+                    double companyMaxPrice = numeric_limits<double>::lowest();
+                    
                     for (const auto& point : history) {
                         double priceValue = point.price().amount().value();
                         prices.push_back(priceValue);
-                        globalMinPrice = std::min(globalMinPrice, priceValue);
-                        globalMaxPrice = std::max(globalMaxPrice, priceValue);
-                        
-                        // Store timestamps from the first company (they should all align)
+                        companyMinPrice = min(companyMinPrice, priceValue);
+                        companyMaxPrice = max(companyMaxPrice, priceValue);
                         if (companyIdx == 0) {
                             timestamps.push_back(point.stamp());
                         }
                     }
                     
                     companiesPrices.push_back(prices);
-                    maxDataPoints = std::max(maxDataPoints, static_cast<int>(prices.size()));
+                    companiesMinMax.push_back({companyMinPrice, companyMaxPrice});
+                    maxDataPoints = max(maxDataPoints, static_cast<int>(prices.size()));
                     companyIdx++;
                 }
                 
@@ -403,13 +403,7 @@ namespace spt::application::ux {
                     return;
                 }
                 
-                // Add some padding to min/max
-                double priceRange = globalMaxPrice - globalMinPrice;
-                if (priceRange < 0.01) priceRange = 1.0; // Avoid division by zero
-                globalMinPrice -= priceRange * 0.1;
-                globalMaxPrice += priceRange * 0.1;
-                
-                // Draw line charts for each company
+                // Draw line charts for each company (each normalized to its own scale)
                 for (size_t idx = 0; idx < companiesPrices.size(); idx++) {
                     dc.SetPen(wxPen(colors[idx], 2));
                     dc.SetBrush(wxBrush(colors[idx]));
@@ -417,34 +411,36 @@ namespace spt::application::ux {
                     const auto& prices = companiesPrices[idx];
                     int numPoints = static_cast<int>(prices.size());
                     
+                    double companyMin = companiesMinMax[idx].first;
+                    double companyMax = companiesMinMax[idx].second;
+                    
+                    // Add padding to this company's range
+                    double priceRange = companyMax - companyMin;
+                    if (priceRange < 0.01) priceRange = 1.0; // Avoid division by zero
+                    companyMin -= priceRange * 0.1;
+                    companyMax += priceRange * 0.1;
+                    
                     // Draw line chart (only if we have multiple points)
                     if (numPoints > 1 && maxDataPoints > 1) {
                         for (int i = 0; i < numPoints - 1; i++) {
                             int x1 = marginLeft + (chartWidth * i) / (maxDataPoints - 1);
                             int x2 = marginLeft + (chartWidth * (i + 1)) / (maxDataPoints - 1);
                             
-                            // Invert Y because screen coordinates are top-down
-                            int y1 = marginTop + chartHeight - (int)((prices[i] - globalMinPrice) / (globalMaxPrice - globalMinPrice) * chartHeight);
-                            int y2 = marginTop + chartHeight - (int)((prices[i + 1] - globalMinPrice) / (globalMaxPrice - globalMinPrice) * chartHeight);
+                            // Normalize each company to use full chart height
+                            int y1 = marginTop + chartHeight - (int)((prices[i] - companyMin) / (companyMax - companyMin) * chartHeight);
+                            int y2 = marginTop + chartHeight - (int)((prices[i + 1] - companyMin) / (companyMax - companyMin) * chartHeight);
                             
                             dc.DrawLine(x1, y1, x2, y2);
                         }
-                    }
-                    
-                    // Draw dots at each price point
-                    for (int i = 0; i < numPoints; i++) {
-                        int x;
-                        if (maxDataPoints > 1) {
-                            x = marginLeft + (chartWidth * i) / (maxDataPoints - 1);
-                        } else {
-                            x = marginLeft + chartWidth / 2; // Center single point
-                        }
-                        int y = marginTop + chartHeight - (int)((prices[i] - globalMinPrice) / (globalMaxPrice - globalMinPrice) * chartHeight);
+                    } else if (numPoints == 1) {
+                        // Single point - draw a dot
+                        int x = marginLeft + chartWidth / 2;
+                        int y = marginTop + chartHeight - (int)((prices[0] - companyMin) / (companyMax - companyMin) * chartHeight);
                         dc.DrawCircle(x, y, 3);
                     }
                 }
                 
-                // Draw legend
+                // Draw legend with price ranges
                 dc.SetFont(wxFont(9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
                 int legendY = marginTop + 10;
                 for (size_t i = 0; i < companiesPrices.size(); i++) {
@@ -452,7 +448,13 @@ namespace spt::application::ux {
                     dc.SetBrush(wxBrush(colors[i]));
                     dc.DrawLine(marginLeft + 10, legendY, marginLeft + 30, legendY);
                     dc.SetTextForeground(*wxBLACK);
-                    dc.DrawText(companyNames[i], marginLeft + 35, legendY - 5);
+                    
+                    // Show company name with price range
+                    double minPrice = companiesMinMax[i].first;
+                    double maxPrice = companiesMinMax[i].second;
+                    wxString label = wxString::Format("%s ($%.2f - $%.2f)", 
+                        companyNames[i].c_str(), minPrice, maxPrice);
+                    dc.DrawText(label, marginLeft + 35, legendY - 5);
                     legendY += 20;
                 }
                 
@@ -460,18 +462,14 @@ namespace spt::application::ux {
                 dc.SetFont(wxFont(8, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
                 dc.SetTextForeground(*wxBLACK);
                 
-                // Y-axis labels (prices)
-                for (int i = 0; i <= 5; i++) {
-                    int y = marginTop + (chartHeight * i) / 5;
-                    double price = globalMaxPrice - ((globalMaxPrice - globalMinPrice) * i) / 5;
-                    dc.DrawText(wxString::Format("$%.2f", price), 10, y - 8);
-                }
+                // Y-axis label (normalized scale, no specific prices)
+                dc.DrawText("Price (normalized)", 5, marginTop - 10);
                 
                 // X-axis labels (timestamps)
                 if (!timestamps.empty() && maxDataPoints > 0) {
-                    auto formatTime = [](std::chrono::system_clock::time_point tp) -> wxString {
-                        auto timeT = std::chrono::system_clock::to_time_t(tp);
-                        std::tm tm;
+                    auto formatTime = [](system_clock::time_point tp) -> wxString {
+                        auto timeT = system_clock::to_time_t(tp);
+                        tm tm;
                         localtime_s(&tm, &timeT);
                         return wxString::Format("%02d:%02d", tm.tm_hour, tm.tm_min);
                     };
