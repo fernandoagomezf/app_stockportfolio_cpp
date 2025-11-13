@@ -54,21 +54,19 @@ namespace spt::infrastructure::services {
                 };
 
                 JsonValue json { fetchData(url) };
-                if (json.contains("quotes") && json["quotes"].isArray()) {
-                    const auto& quotes = json["quotes"].getArray();
-                    if (!quotes.empty()) {
-                        const auto& quote = quotes[0];
-                        if (quote.isObject()) {                            
-                            Ticker ticker { quote["symbol"].getString() };
-                            Company company { move(ticker) };
-                            company.setName(quote["shortname"].getString());
-                            company.setType(quote["quoteType"].getString());
-                            company.setExchange(quote["exchDisp"].getString());
-                            company.setSector(quote["sectorDisp"].getString());
-                            company.setIndustry(quote["industryDisp"].getString());
-                            
-                            result = move(company);
-                        }
+                const auto& quotes = json["quotes"].getArray();
+                if (!quotes.empty()) {
+                    const auto& quote = quotes[0];
+                    if (quote.isObject()) {                            
+                        Ticker ticker { quote["symbol"].getString() };
+                        Company company { move(ticker) };
+                        company.setName(quote["shortname"].getString());
+                        company.setType(quote["quoteType"].getString());
+                        company.setExchange(quote["exchDisp"].getString());
+                        company.setSector(quote["sectorDisp"].getString());
+                        company.setIndustry(quote["industryDisp"].getString());
+                        
+                        result = move(company);
                     }
                 }
 

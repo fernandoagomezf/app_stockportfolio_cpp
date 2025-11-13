@@ -67,6 +67,26 @@ namespace spt::domain::investments {
                 untrack(company.ticker());
             }
 
+            Company& getCompany(Ticker ticker) {
+                if (!_companies.contains(ticker)) {
+                    throw runtime_error {
+                        "Company with ticker " + ticker.symbol() + " is not being tracked."
+                    };
+                }
+
+                return _companies.at(ticker);
+            }
+
+            const Company& getCompany(Ticker ticker) const {
+                if (!_companies.contains(ticker)) {
+                    throw runtime_error {
+                        "Company with ticker " + ticker.symbol() + " is not being tracked."
+                    };
+                }
+
+                return _companies.at(ticker);
+            }
+
             Money capital() const {
                 return _capital;
             }
