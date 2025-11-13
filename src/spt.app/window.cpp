@@ -19,7 +19,6 @@ namespace spt::application::ux {
     using std::optional;
     using std::rand;
     using std::srand;
-    using std::stod;
     using std::string;
     using std::string_view;
     using std::time;
@@ -29,11 +28,7 @@ namespace spt::application::ux {
     using spt::domain::investments::Ticker;
     using spt::domain::investments::Money;
     using spt::domain::investments::Price;
-    using spt::infrastructure::net::HttpClient;
-    using spt::infrastructure::net::HttpRequest;
-    using spt::infrastructure::net::HttpMethod;
-    using spt::infrastructure::text::JsonParser;
-    using spt::infrastructure::text::JsonValue;
+    using spt::infrastructure::services::YahooPriceFetcher;
     
     enum class MenuId {
         NewSession = wxID_HIGHEST + 1,
@@ -50,6 +45,7 @@ namespace spt::application::ux {
             wxStaticText* _capitalText;
             wxGrid* _holdingsGrid;
             optional<Portfolio> _portfolio;
+            YahooPriceFetcher _priceFetcher;
 
         public:
             Window()
@@ -231,48 +227,16 @@ namespace spt::application::ux {
             void fetchIntradayData() {
                 if (!_portfolio.has_value()) return;
                 
-                for (const auto& company : _portfolio->companies()) {
-                    SetStatusText(wxString::Format("Fetching price for %s...", wxString::FromUTF8(company.ticker().symbol())));
-                    fetchTickerData(company.ticker());
+                SetStatusText("Fetching price data...");
+                
+                try {
+                    _priceFetcher.fetch(_portfolio.value());
+                    SetStatusText("Price data loaded.");
+                } catch (const std::exception& ex) {
+                    SetStatusText(wxString::Format("Error fetching prices: %s", ex.what()));
                 }
                 
-                SetStatusText("Price data loaded.");
                 updatePortfolioDisplay();
-            }
-            
-            void fetchTickerData(const Ticker& ticker) {
-                HttpClient client;
-                string url = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol="
-                                + ticker.symbol()
-                                + "&interval=5min&apikey=2SACRS4UK8QY45Z9";
-                
-                HttpRequest request { url, HttpMethod::GET };
-                auto response = client.send(request);
-                
-                if (response.status() != 200) {
-                    return;
-                }
-                
-                // Parse JSON response
-                JsonValue json = JsonParser::parse(response.body());
-                
-                if (!json.contains("Time Series (5min)")) {
-                    return;
-                }
-                
-                auto timeSeries = json["Time Series (5min)"].getObject();
-                
-                // Get the most recent price and update the portfolio
-                for (const auto& [timestamp, data] : timeSeries) {
-                    if (!data.contains("4. close")) continue;
-                    
-                    double closePrice = stod(data["4. close"].getString());
-                    Price price { Money { closePrice } };
-                    _portfolio->updatePrice(ticker, price);
-                    
-                    // Just use the most recent price
-                    break;
-                }
             }
 
             void onPreferences(wxCommandEvent& event) {
