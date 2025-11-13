@@ -56,7 +56,6 @@ namespace spt::application::ux {
             void createControls() {
                 wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 
-                // Initial capital section
                 wxStaticBoxSizer* capitalBox = new wxStaticBoxSizer(wxHORIZONTAL, this, "Porfolio");
                 wxStaticText* capitalLabel = new wxStaticText(this, wxID_ANY, "Initial Capital Amount:");
                 _capitalTextCtrl = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(150, -1));
@@ -64,7 +63,6 @@ namespace spt::application::ux {
                 capitalBox->Add(_capitalTextCtrl, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
                 mainSizer->Add(capitalBox, 0, wxEXPAND | wxALL, 10);
 
-                // Company search section
                 wxStaticBoxSizer* searchBox = new wxStaticBoxSizer(wxVERTICAL, this, "Companies");
                 wxBoxSizer* searchSizer = new wxBoxSizer(wxHORIZONTAL);
                 wxStaticText* searchLabel = new wxStaticText(this, wxID_ANY, "Ticker:");
@@ -77,7 +75,6 @@ namespace spt::application::ux {
                 searchBox->Add(searchSizer, 0, wxEXPAND | wxALL, 5);
                 mainSizer->Add(searchBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
-                // Grid for companies
                 wxStaticBoxSizer* gridBox = new wxStaticBoxSizer(wxVERTICAL, this, "Companies to Track");
                 _grid = new wxGrid(this, wxID_ANY);
                 _grid->CreateGrid(0, 6);
@@ -101,13 +98,11 @@ namespace spt::application::ux {
                 
                 gridBox->Add(_grid, 1, wxEXPAND | wxALL, 5);
                 
-                // Remove button
                 wxButton* removeButton = new wxButton(this, wxID_ANY, "Remove Selected");
                 gridBox->Add(removeButton, 0, wxALIGN_RIGHT | wxALL, 5);
                 
                 mainSizer->Add(gridBox, 1, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
-                // OK/Cancel buttons
                 wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
                 wxButton* okButton = new wxButton(this, wxID_OK, "OK");
                 wxButton* cancelButton = new wxButton(this, wxID_CANCEL, "Cancel");
@@ -116,7 +111,6 @@ namespace spt::application::ux {
                 mainSizer->Add(buttonSizer, 0, wxALIGN_RIGHT | wxALL, 10);
                 SetSizer(mainSizer);
 
-                // Bind events
                 searchButton->Bind(wxEVT_BUTTON, &PortfolioDialog::onSearch, this);
                 removeButton->Bind(wxEVT_BUTTON, &PortfolioDialog::onRemove, this);
                 okButton->Bind(wxEVT_BUTTON, &PortfolioDialog::onOk, this);
