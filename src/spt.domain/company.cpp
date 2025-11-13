@@ -115,6 +115,19 @@ namespace spt::domain::investments {
                 _pricePoints.emplace(timestamp, newPrice);
             }
 
+            system_clock::time_point latestPriceTimestamp() const {
+                if (_pricePoints.empty()) {
+                    return system_clock::time_point{}; // Return epoch if no prices
+                }
+                return _pricePoints.top().stamp();
+            }
+
+            void clearPriceHistory() {
+                while (!_pricePoints.empty()) {
+                    _pricePoints.pop();
+                }
+            }
+
             vector<PricePoint> priceHistory() const {
                 vector<PricePoint> history;
                 stack<PricePoint> temp = _pricePoints;

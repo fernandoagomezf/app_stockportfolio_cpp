@@ -75,13 +75,21 @@ namespace spt::infrastructure::services {
                 const auto& timestamps = result["timestamp"].getArray();
                 const auto& prices = result["indicators"]["quote"][0]["close"].getArray();
                 
+                // Get the latest timestamp we already have
+                auto latestTimestamp = company.latestPriceTimestamp();
+                
+                // Only add price points with timestamps newer than what we have
                 for (size_t i = 0; i < prices.size() && i < timestamps.size(); i++) {
                     if (prices[i].isNumber() && timestamps[i].isNumber()) {
                         auto timestamp = system_clock::from_time_t(static_cast<time_t>(timestamps[i].getNumber()));
-                        company.updatePrice(
-                            timestamp,
-                            Price { Money { prices[i].getNumber() } }
-                        );
+                        
+                        // Only add if this timestamp is newer than the latest we have
+                        if (timestamp > latestTimestamp) {
+                            company.updatePrice(
+                                timestamp,
+                                Price { Money { prices[i].getNumber() } }
+                            );
+                        }
                     }
                 }
             }
