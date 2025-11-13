@@ -80,17 +80,19 @@ namespace spt::application::ux {
                 // Grid for companies
                 wxStaticBoxSizer* gridBox = new wxStaticBoxSizer(wxVERTICAL, this, "Companies to Track");
                 _grid = new wxGrid(this, wxID_ANY);
-                _grid->CreateGrid(0, 5);
+                _grid->CreateGrid(0, 6);
                 _grid->SetColLabelValue(0, "Symbol");
-                _grid->SetColLabelValue(1, "Name");
-                _grid->SetColLabelValue(2, "Type");
-                _grid->SetColLabelValue(3, "Sector");
-                _grid->SetColLabelValue(4, "Industry");
-                _grid->SetColSize(0, 100);
-                _grid->SetColSize(1, 250);
-                _grid->SetColSize(2, 120);
-                _grid->SetColSize(3, 100);
-                _grid->SetColSize(4, 80);
+                _grid->SetColLabelValue(1, "Exchange");
+                _grid->SetColLabelValue(2, "Name");
+                _grid->SetColLabelValue(3, "Type");
+                _grid->SetColLabelValue(4, "Sector");
+                _grid->SetColLabelValue(5, "Industry");
+                _grid->SetColSize(0, 90);
+                _grid->SetColSize(1, 100);
+                _grid->SetColSize(2, 200);
+                _grid->SetColSize(3, 70);
+                _grid->SetColSize(4, 120);
+                _grid->SetColSize(5, 120);
                 _grid->EnableEditing(false);
                 _grid->SetSelectionMode(wxGrid::wxGridSelectRows);
                 _grid->EnableDragRowSize(false);
@@ -168,10 +170,11 @@ namespace spt::application::ux {
                 int row = _grid->GetNumberRows();
                 _grid->AppendRows(1);
                 _grid->SetCellValue(row, 0, company.ticker().symbol());
-                _grid->SetCellValue(row, 1, company.getName());
-                _grid->SetCellValue(row, 2, company.getType());
-                _grid->SetCellValue(row, 3, company.getSector());
-                _grid->SetCellValue(row, 4, company.getIndustry());
+                _grid->SetCellValue(row, 1, company.getExchange());
+                _grid->SetCellValue(row, 2, company.getName());
+                _grid->SetCellValue(row, 3, company.getType());
+                _grid->SetCellValue(row, 4, company.getSector());
+                _grid->SetCellValue(row, 5, company.getIndustry());
                 
                 for (int col = 0; col < 5; ++col) {
                     _grid->SetReadOnly(row, col);
