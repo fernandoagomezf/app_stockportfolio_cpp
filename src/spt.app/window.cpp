@@ -13,9 +13,11 @@ import spt.infrastructure;
 import :portfoliodialog;
 
 namespace spt::application::ux {
+    using std::chrono::system_clock;
     using std::format;
     using std::move;
     using std::nullopt;
+    using std::numeric_limits;
     using std::optional;
     using std::rand;
     using std::srand;
@@ -361,8 +363,9 @@ namespace spt::application::ux {
                 
                 vector<string> companyNames;
                 vector<vector<double>> companiesPrices;
-                double globalMinPrice = std::numeric_limits<double>::max();
-                double globalMaxPrice = std::numeric_limits<double>::lowest();
+                vector<system_clock::time_point> timestamps;
+                double globalMinPrice = numeric_limits<double>::max();
+                double globalMaxPrice = numeric_limits<double>::lowest();
                 int maxDataPoints = 0;
                 
                 size_t companyIdx = 0;
@@ -380,6 +383,11 @@ namespace spt::application::ux {
                         prices.push_back(priceValue);
                         globalMinPrice = std::min(globalMinPrice, priceValue);
                         globalMaxPrice = std::max(globalMaxPrice, priceValue);
+                        
+                        // Store timestamps from the first company (they should all align)
+                        if (companyIdx == 0) {
+                            timestamps.push_back(point.stamp());
+                        }
                     }
                     
                     companiesPrices.push_back(prices);
@@ -459,8 +467,38 @@ namespace spt::application::ux {
                     dc.DrawText(wxString::Format("$%.2f", price), 10, y - 8);
                 }
                 
-                // X-axis label
-                dc.DrawText("Time", marginLeft + chartWidth / 2 - 15, marginTop + chartHeight + 20);
+                // X-axis labels (timestamps)
+                if (!timestamps.empty() && maxDataPoints > 0) {
+                    auto formatTime = [](std::chrono::system_clock::time_point tp) -> wxString {
+                        auto timeT = std::chrono::system_clock::to_time_t(tp);
+                        std::tm tm;
+                        localtime_s(&tm, &timeT);
+                        return wxString::Format("%02d:%02d", tm.tm_hour, tm.tm_min);
+                    };
+                    
+                    if (maxDataPoints == 1) {
+                        // Single point - show in center
+                        wxString timeStr = formatTime(timestamps[0]);
+                        int x = marginLeft + chartWidth / 2;
+                        dc.DrawText(timeStr, x - 15, marginTop + chartHeight + 5);
+                    } else {
+                        // Multiple points - show left, middle, right
+                        // Left-most point
+                        wxString leftTime = formatTime(timestamps[0]);
+                        dc.DrawText(leftTime, marginLeft - 15, marginTop + chartHeight + 5);
+                        
+                        // Middle point
+                        int midIdx = timestamps.size() / 2;
+                        wxString midTime = formatTime(timestamps[midIdx]);
+                        int midX = marginLeft + chartWidth / 2;
+                        dc.DrawText(midTime, midX - 15, marginTop + chartHeight + 5);
+                        
+                        // Right-most point
+                        wxString rightTime = formatTime(timestamps[timestamps.size() - 1]);
+                        int rightX = marginLeft + chartWidth;
+                        dc.DrawText(rightTime, rightX - 30, marginTop + chartHeight + 5);
+                    }
+                }
             }
 
             void onAbout(wxCommandEvent& event) {
