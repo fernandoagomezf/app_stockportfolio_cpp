@@ -32,6 +32,7 @@ namespace spt::application::ux {
     
     enum class MenuId {
         NewSession = wxID_HIGHEST + 1,
+        Refresh,
         Preferences
     };
 
@@ -134,6 +135,7 @@ namespace spt::application::ux {
 
                 wxMenu* fileMenu = new wxMenu();
                 fileMenu->Append(static_cast<int>(MenuId::NewSession), "&New Session\tCtrl-N", "Create a new trading session");
+                fileMenu->Append(static_cast<int>(MenuId::Refresh), "&Refresh Prices\tF5", "Refresh intraday price data");
                 fileMenu->AppendSeparator();
                 fileMenu->Append(wxID_EXIT, "&Exit\tAlt-F4", "Exit the application");
                 menuBar->Append(fileMenu, "&File");
@@ -149,6 +151,7 @@ namespace spt::application::ux {
                 SetMenuBar(menuBar);
 
                 Bind(wxEVT_MENU, &Window::onNewSession, this, static_cast<int>(MenuId::NewSession));
+                Bind(wxEVT_MENU, &Window::onRefresh, this, static_cast<int>(MenuId::Refresh));
                 Bind(wxEVT_MENU, &Window::onExit, this, wxID_EXIT);
                 Bind(wxEVT_MENU, &Window::onPreferences, this, static_cast<int>(MenuId::Preferences));
                 Bind(wxEVT_MENU, &Window::onAbout, this, wxID_ABOUT);
@@ -163,9 +166,18 @@ namespace spt::application::ux {
                     wxArtProvider::GetBitmap(wxART_NEW, wxART_TOOLBAR),
                     "Create a new trading session"
                 );
+                
+                toolBar->AddTool(
+                    static_cast<int>(MenuId::Refresh),
+                    "Refresh",
+                    wxArtProvider::GetBitmap(wxART_REDO, wxART_TOOLBAR),
+                    "Refresh intraday price data"
+                );
+                
                 toolBar->Realize();
 
                 Bind(wxEVT_TOOL, &Window::onNewSession, this, static_cast<int>(MenuId::NewSession));
+                Bind(wxEVT_TOOL, &Window::onRefresh, this, static_cast<int>(MenuId::Refresh));
             }
 
             void createStatusBar() {
@@ -181,12 +193,15 @@ namespace spt::application::ux {
                 PortfolioDialog dialog(this);
                 
                 if (dialog.ShowModal() == wxID_OK) {
-                    _portfolio = move(dialog.getPortfolio());                    
+                    _portfolio = move(dialog.getPortfolio());                      
+                    for (auto& ticker : _portfolio->tickers()) {
+                        _portfolio->buyShares(ticker, 1);
+                    }
                     _splitter->Show();
                     _mainPanel->Layout();
                     _mainPanel->Refresh();
-                    SendSizeEvent();                    
-                    updatePortfolioDisplay();                    
+                    SendSizeEvent();
+                    updatePortfolioDisplay();  
                     fetchIntradayData();
                     SetStatusText("Portfolio loaded successfully.");
                 }
@@ -207,9 +222,9 @@ namespace spt::application::ux {
                     _holdingsGrid->SetCellValue(row, 0, wxString(company.ticker().symbol()));
                     _holdingsGrid->SetCellValue(row, 1, wxString::Format("%d", company.shareCount()));
                     
-                    if (!company.currentPrice().isZero()) {
-                        _holdingsGrid->SetCellValue(row, 2, wxString::Format("$%.2f", company.currentPrice().value()));
-                        double totalValue = company.currentPrice().value() * company.shareCount();
+                    if (!company.currentPrice().amount().isZero()) {
+                        _holdingsGrid->SetCellValue(row, 2, wxString::Format("$%.2f", company.currentPrice().amount().value()));
+                        double totalValue = company.currentPrice().amount().value() * company.shareCount();
                         _holdingsGrid->SetCellValue(row, 4, wxString::Format("$%.2f", totalValue));
                     } else {
                         _holdingsGrid->SetCellValue(row, 2, "$0.00");
@@ -237,6 +252,20 @@ namespace spt::application::ux {
                 }
                 
                 updatePortfolioDisplay();
+            }
+
+            void onRefresh(wxCommandEvent& event) {
+                if (!_portfolio.has_value()) {
+                    wxMessageBox(
+                        "No portfolio loaded. Please create a new session first.",
+                        "No Portfolio",
+                        wxOK | wxICON_INFORMATION,
+                        this
+                    );
+                    return;
+                }
+                
+                fetchIntradayData();
             }
 
             void onPreferences(wxCommandEvent& event) {

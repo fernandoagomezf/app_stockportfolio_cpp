@@ -89,20 +89,20 @@ namespace spt::domain::investments {
                 _industry = industry;
             }
 
-            Money currentPrice() const {
+            Price currentPrice() const {
                 if (_pricePoints.empty()) {
-                    return Money::zero();
+                    return Price::unknown();
                 } else {
                     return _pricePoints
                         .top()
-                        .price()
-                        .amount();
+                        .price();
                 }
             }
 
-            Money priceFor(int shares) const {
-                Money price = currentPrice();
-                return price * shares;
+            Price priceFor(int shares) const {
+                Price price { currentPrice() };
+                Money amount { price.amount() };
+                return Price { amount * shares };
             }
 
             void updatePrice(Price newPrice) {
@@ -137,8 +137,7 @@ namespace spt::domain::investments {
                     throw invalid_argument { "Number of shares to buy must be positive." };
                 }
 
-                PricePoint pt { _pricePoints.top() };
-                _transactions.emplace_back(TransactionType::Buy, shares, pt.price());
+                _transactions.emplace_back(TransactionType::Buy, shares, currentPrice());
             }
 
             void sellShares(int shares) {
@@ -149,8 +148,7 @@ namespace spt::domain::investments {
                     throw invalid_argument { "Cannot sell more shares than currently owned." };
                 }
 
-                PricePoint pt { _pricePoints.top() };
-                _transactions.emplace_back(TransactionType::Sell, shares, pt.price());
+                _transactions.emplace_back(TransactionType::Sell, shares, currentPrice());
             }
     };
 }

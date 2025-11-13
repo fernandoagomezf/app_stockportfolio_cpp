@@ -106,7 +106,8 @@ namespace spt::domain::investments {
                 }
 
                 Company& company { track(ticker) };
-                Money cost { company.priceFor(shares) };
+                Price price { company.priceFor(shares) };
+                Money cost { price.amount() };
                 if (cost > _capital) {
                     throw invalid_argument { "Insufficient capital to complete purchase." };
                 }

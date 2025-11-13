@@ -20,6 +20,10 @@ namespace spt::domain::investments {
                 }
             }
 
+            static Price unknown() {
+                return Price { Money { 1.0 } };
+            }
+
             Money amount() const {
                 return _amount;
             }
