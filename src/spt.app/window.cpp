@@ -215,7 +215,7 @@ namespace spt::application::ux {
                 for (const auto& ticker : _portfolio->tickers()) {
                     const auto& company = _portfolio->getCompany(ticker);
                     _holdingsGrid->AppendRows(1);
-                    int row = _holdingsGrid->GetNumberRows() - 1;
+                    int row { _holdingsGrid->GetNumberRows() - 1 };
                     
                     _holdingsGrid->SetCellValue(row, 0, wxString(company.ticker().symbol()));
                     _holdingsGrid->SetCellValue(row, 1, wxString(company.getName()));
@@ -277,7 +277,7 @@ namespace spt::application::ux {
             void resizeGridColumns() {
                 if (!_holdingsGrid) return;
                 
-                int gridWidth = _holdingsGrid->GetClientSize().GetWidth();
+                int gridWidth { _holdingsGrid->GetClientSize().GetWidth() };
                 if (gridWidth > 100) {
                     _holdingsGrid->SetColSize(0, static_cast<int>(gridWidth * 0.10)); // symbol
                     _holdingsGrid->SetColSize(1, static_cast<int>(gridWidth * 0.25)); // company name
@@ -320,17 +320,17 @@ namespace spt::application::ux {
             void onPaintChart(wxPaintEvent& event) {
                 wxPaintDC dc(_chartPanel);
                 
-                wxSize size = _chartPanel->GetSize();
-                int width = size.GetWidth();
-                int height = size.GetHeight();
+                wxSize size { _chartPanel->GetSize() };
+                int width { size.GetWidth() };
+                int height { size.GetHeight() };
                 
-                int marginLeft = 60;
-                int marginRight = 20;
-                int marginTop = 20;
-                int marginBottom = 140; 
+                int marginLeft { 60 };
+                int marginRight { 20 };
+                int marginTop { 20 };
+                int marginBottom { 140 };
                 
-                int chartWidth = width - marginLeft - marginRight;
-                int chartHeight = height - marginTop - marginBottom;
+                int chartWidth { width - marginLeft - marginRight };
+                int chartHeight { height - marginTop - marginBottom };
                 
                 if (chartWidth <= 0 || chartHeight <= 0) return;                
                 if (!_portfolio.has_value()) {
@@ -346,7 +346,7 @@ namespace spt::application::ux {
                 
                 dc.SetPen(wxPen(wxColour(220, 220, 220), 1));
                 for (int i = 1; i < 5; i++) {
-                    int y = marginTop + (chartHeight * i) / 5;
+                    int y { marginTop + (chartHeight * i) / 5 };
                     dc.DrawLine(marginLeft, y, marginLeft + chartWidth, y);
                 }
                 
@@ -372,9 +372,9 @@ namespace spt::application::ux {
                 vector<vector<double>> companiesPrices;
                 vector<pair<double, double>> companiesMinMax; // store min/max for each company
                 vector<system_clock::time_point> timestamps;
-                int maxDataPoints = 0;
+                int maxDataPoints { 0 };
                 
-                size_t companyIdx = 0;
+                size_t companyIdx { 0 };
                 for (const auto& ticker : _portfolio->tickers()) {
                     const auto& company = _portfolio->getCompany(ticker);
                     if (companyIdx >= colors.size()) break; // limit to available colors
@@ -385,11 +385,11 @@ namespace spt::application::ux {
                     companyNames.push_back(company.getName());
                     
                     vector<double> prices;
-                    double companyMinPrice = numeric_limits<double>::max();
-                    double companyMaxPrice = numeric_limits<double>::lowest();
+                    double companyMinPrice { numeric_limits<double>::max() };
+                    double companyMaxPrice { numeric_limits<double>::lowest() };
                     
                     for (const auto& point : history) {
-                        double priceValue = point.price().amount().value();
+                        double priceValue { point.price().amount().value() };
                         prices.push_back(priceValue);
                         companyMinPrice = min(companyMinPrice, priceValue);
                         companyMaxPrice = max(companyMaxPrice, priceValue);
@@ -416,54 +416,54 @@ namespace spt::application::ux {
                     dc.SetBrush(wxBrush(colors[idx]));
                     
                     const auto& prices = companiesPrices[idx];
-                    int numPoints = static_cast<int>(prices.size());
+                    int numPoints { static_cast<int>(prices.size()) };
                     
-                    double companyMin = companiesMinMax[idx].first;
-                    double companyMax = companiesMinMax[idx].second;
+                    double companyMin { companiesMinMax[idx].first };
+                    double companyMax { companiesMinMax[idx].second };
                     
-                    double priceRange = companyMax - companyMin;
+                    double priceRange { companyMax - companyMin };
                     if (priceRange < 0.01) priceRange = 1.0; // avoid division by zero
                     companyMin -= priceRange * 0.1;
                     companyMax += priceRange * 0.1;
                     
                     if (numPoints > 1 && maxDataPoints > 1) {
                         for (int i = 0; i < numPoints - 1; i++) {
-                            int x1 = marginLeft + (chartWidth * i) / (maxDataPoints - 1);
-                            int x2 = marginLeft + (chartWidth * (i + 1)) / (maxDataPoints - 1);
+                            int x1 { marginLeft + (chartWidth * i) / (maxDataPoints - 1) };
+                            int x2 { marginLeft + (chartWidth * (i + 1)) / (maxDataPoints - 1) };
                             
-                            int y1 = marginTop + chartHeight - (int)((prices[i] - companyMin) / (companyMax - companyMin) * chartHeight);
-                            int y2 = marginTop + chartHeight - (int)((prices[i + 1] - companyMin) / (companyMax - companyMin) * chartHeight);
+                            int y1 { marginTop + chartHeight - (int)((prices[i] - companyMin) / (companyMax - companyMin) * chartHeight) };
+                            int y2 { marginTop + chartHeight - (int)((prices[i + 1] - companyMin) / (companyMax - companyMin) * chartHeight) };
                             
                             dc.DrawLine(x1, y1, x2, y2);
                         }
                     } else if (numPoints == 1) {
-                        int x = marginLeft + chartWidth / 2;
-                        int y = marginTop + chartHeight - (int)((prices[0] - companyMin) / (companyMax - companyMin) * chartHeight);
+                        int x { marginLeft + chartWidth / 2 };
+                        int y { marginTop + chartHeight - (int)((prices[0] - companyMin) / (companyMax - companyMin) * chartHeight) };
                         dc.DrawCircle(x, y, 3);
                     }
                 }
                 
                 // draw legend with price ranges below the chart in 3 columns
                 dc.SetFont(wxFont(9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-                int legendStartY = marginTop + chartHeight + 35;
-                int columnWidth = chartWidth / 3;
+                int legendStartY { marginTop + chartHeight + 35 };
+                int columnWidth { chartWidth / 3 };
                 
                 for (size_t i = 0; i < companiesPrices.size(); i++) {
-                    int column = i / 5; // 5 items per column
-                    int row = i % 5;
+                    int column { static_cast<int>(i / 5) }; // 5 items per column
+                    int row { static_cast<int>(i % 5) };
                     
                     if (column >= 3) break; // max 3 columns (15 items)
                     
-                    int legendX = marginLeft + (column * columnWidth);
-                    int legendY = legendStartY + (row * 20);
+                    int legendX { marginLeft + (column * columnWidth) };
+                    int legendY { legendStartY + (row * 20) };
                     
                     dc.SetPen(wxPen(colors[i], 2));
                     dc.SetBrush(wxBrush(colors[i]));
                     dc.DrawLine(legendX + 10, legendY, legendX + 30, legendY);
                     dc.SetTextForeground(*wxBLACK);
                     
-                    double minPrice = companiesMinMax[i].first;
-                    double maxPrice = companiesMinMax[i].second;
+                    double minPrice { companiesMinMax[i].first };
+                    double maxPrice { companiesMinMax[i].second };
                     wxString label = wxString::Format("%s ($%.2f - $%.2f)", 
                         companyNames[i].c_str(), minPrice, maxPrice);
                     dc.DrawText(label, legendX + 35, legendY - 5);
@@ -483,20 +483,20 @@ namespace spt::application::ux {
                     };
                     
                     if (maxDataPoints == 1) {
-                        wxString timeStr = formatTime(timestamps[0]);
-                        int x = marginLeft + chartWidth / 2;
+                        wxString timeStr { formatTime(timestamps[0]) };
+                        int x { marginLeft + chartWidth / 2 };
                         dc.DrawText(timeStr, x - 15, marginTop + chartHeight + 20);
                     } else {
-                        wxString leftTime = formatTime(timestamps[0]);
+                        wxString leftTime { formatTime(timestamps[0]) };
                         dc.DrawText(leftTime, marginLeft - 15, marginTop + chartHeight + 20);
                         
-                        int midIdx = timestamps.size() / 2;
-                        wxString midTime = formatTime(timestamps[midIdx]);
-                        int midX = marginLeft + chartWidth / 2;
+                        int midIdx { static_cast<int>(timestamps.size() / 2) };
+                        wxString midTime { formatTime(timestamps[midIdx]) };
+                        int midX { marginLeft + chartWidth / 2 };
                         dc.DrawText(midTime, midX - 15, marginTop + chartHeight + 20);
                         
-                        wxString rightTime = formatTime(timestamps[timestamps.size() - 1]);
-                        int rightX = marginLeft + chartWidth;
+                        wxString rightTime { formatTime(timestamps[timestamps.size() - 1]) };
+                        int rightX { marginLeft + chartWidth };
                         dc.DrawText(rightTime, rightX - 30, marginTop + chartHeight + 20);
                     }
                 }

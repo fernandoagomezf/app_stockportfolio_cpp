@@ -55,13 +55,6 @@ namespace spt::application::ux {
             void createControls() {
                 wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 
-                //wxStaticBoxSizer* capitalBox = new wxStaticBoxSizer(wxHORIZONTAL, this, "Porfolio");
-                //wxStaticText* capitalLabel = new wxStaticText(this, wxID_ANY, "Initial Capital Amount:");
-                //_capitalTextCtrl = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(150, -1));
-                //capitalBox->Add(capitalLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-                //capitalBox->Add(_capitalTextCtrl, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-                //mainSizer->Add(capitalBox, 0, wxEXPAND | wxALL, 10);
-
                 wxStaticBoxSizer* searchBox = new wxStaticBoxSizer(wxVERTICAL, this, "Companies");
                 wxBoxSizer* searchSizer = new wxBoxSizer(wxHORIZONTAL);
                 wxStaticText* searchLabel = new wxStaticText(this, wxID_ANY, "Ticker:");
@@ -160,7 +153,7 @@ namespace spt::application::ux {
             }
 
             void addCompanyToGrid(const Company& company) {
-                int row = _grid->GetNumberRows();
+                int row { _grid->GetNumberRows() };
                 _grid->AppendRows(1);
                 _grid->SetCellValue(row, 0, company.ticker().symbol());
                 _grid->SetCellValue(row, 1, company.getExchange());
@@ -187,7 +180,7 @@ namespace spt::application::ux {
                 }
 
                 for (int i = selectedRows.GetCount() - 1; i >= 0; --i) {
-                    int row = selectedRows[i];
+                    int row { selectedRows[i] };
                     wxString symbol = _grid->GetCellValue(row, 0);
                     if (!symbol.IsEmpty()) {                        
                         Ticker ticker { symbol.ToStdString() };
@@ -198,28 +191,6 @@ namespace spt::application::ux {
             }
 
             void onOk(wxCommandEvent& event) {                
-                /*wxString capitalStr = _capitalTextCtrl->GetValue();
-                if (capitalStr.IsEmpty()) {
-                    wxMessageBox(
-                        "Please enter the initial capital.",
-                        "Missing Capital",
-                        wxOK | wxICON_WARNING,
-                        this
-                    );
-                    return;
-                }
-
-                double capital = 0.0;
-                if (!capitalStr.ToDouble(&capital) || capital <= 0) {
-                    wxMessageBox(
-                        "Please enter a valid positive number for the initial capital.",
-                        "Invalid Capital",
-                        wxOK | wxICON_WARNING,
-                        this
-                    );
-                    return;
-                }*/
-
                 if (_grid->GetNumberRows() == 0) {
                     wxMessageBox(
                         "Please add at least one company to track.",
@@ -231,10 +202,7 @@ namespace spt::application::ux {
                 }
 
                 try {
-                    /*Money initialCapital { capital };
-                    _portfolio.capitalize(initialCapital);*/
                     EndModal(wxID_OK);
-
                 } catch (const std::exception& ex) {
                     wxMessageBox(
                         format("Error creating portfolio: {}", ex.what()),
