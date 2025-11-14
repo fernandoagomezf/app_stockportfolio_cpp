@@ -34,7 +34,6 @@ namespace spt::application::ux {
     export class PortfolioDialog final : public wxDialog {
         private:
             wxGrid* _grid;
-            wxTextCtrl* _capitalTextCtrl;
             wxTextCtrl* _companySearchBox;
             unique_ptr<CompanySearch> _searchService;
             Portfolio _portfolio;
@@ -56,12 +55,12 @@ namespace spt::application::ux {
             void createControls() {
                 wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 
-                wxStaticBoxSizer* capitalBox = new wxStaticBoxSizer(wxHORIZONTAL, this, "Porfolio");
-                wxStaticText* capitalLabel = new wxStaticText(this, wxID_ANY, "Initial Capital Amount:");
-                _capitalTextCtrl = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(150, -1));
-                capitalBox->Add(capitalLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-                capitalBox->Add(_capitalTextCtrl, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-                mainSizer->Add(capitalBox, 0, wxEXPAND | wxALL, 10);
+                //wxStaticBoxSizer* capitalBox = new wxStaticBoxSizer(wxHORIZONTAL, this, "Porfolio");
+                //wxStaticText* capitalLabel = new wxStaticText(this, wxID_ANY, "Initial Capital Amount:");
+                //_capitalTextCtrl = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(150, -1));
+                //capitalBox->Add(capitalLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+                //capitalBox->Add(_capitalTextCtrl, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+                //mainSizer->Add(capitalBox, 0, wxEXPAND | wxALL, 10);
 
                 wxStaticBoxSizer* searchBox = new wxStaticBoxSizer(wxVERTICAL, this, "Companies");
                 wxBoxSizer* searchSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -199,7 +198,7 @@ namespace spt::application::ux {
             }
 
             void onOk(wxCommandEvent& event) {                
-                wxString capitalStr = _capitalTextCtrl->GetValue();
+                /*wxString capitalStr = _capitalTextCtrl->GetValue();
                 if (capitalStr.IsEmpty()) {
                     wxMessageBox(
                         "Please enter the initial capital.",
@@ -219,7 +218,7 @@ namespace spt::application::ux {
                         this
                     );
                     return;
-                }
+                }*/
 
                 if (_grid->GetNumberRows() == 0) {
                     wxMessageBox(
@@ -232,8 +231,8 @@ namespace spt::application::ux {
                 }
 
                 try {
-                    Money initialCapital { capital };
-                    _portfolio.capitalize(initialCapital);                    
+                    /*Money initialCapital { capital };
+                    _portfolio.capitalize(initialCapital);*/
                     EndModal(wxID_OK);
 
                 } catch (const std::exception& ex) {

@@ -50,7 +50,6 @@ namespace spt::application::ux {
             wxPanel* _leftPanel;
             wxPanel* _rightPanel;
             wxPanel* _chartPanel;
-            wxStaticText* _capitalText;
             wxGrid* _holdingsGrid;
             optional<Portfolio> _portfolio;
             YahooPriceFetcher _priceFetcher;
@@ -64,7 +63,6 @@ namespace spt::application::ux {
                   _leftPanel(nullptr),
                   _rightPanel(nullptr),
                   _chartPanel(nullptr),
-                  _capitalText(nullptr),
                   _holdingsGrid(nullptr)
             {
                 srand(static_cast<unsigned int>(time(nullptr)));
@@ -90,22 +88,13 @@ namespace spt::application::ux {
                 _leftPanel = new wxPanel(_splitter, wxID_ANY);
                 wxBoxSizer* leftSizer = new wxBoxSizer(wxVERTICAL);
                 
-                _capitalText = new wxStaticText(_leftPanel, wxID_ANY, "Available Capital: $0.00");
-                wxFont capitalFont = _capitalText->GetFont();
-                capitalFont.SetPointSize(12);
-                capitalFont.SetWeight(wxFONTWEIGHT_BOLD);
-                _capitalText->SetFont(capitalFont);
-                leftSizer->Add(_capitalText, 0, wxALL, 10);
-                
                 _holdingsGrid = new wxGrid(_leftPanel, wxID_ANY);
-                _holdingsGrid->CreateGrid(0, 7);
+                _holdingsGrid->CreateGrid(0, 5);
                 _holdingsGrid->SetColLabelValue(0, "Symbol");
                 _holdingsGrid->SetColLabelValue(1, "Company Name");
-                _holdingsGrid->SetColLabelValue(2, "Exchange");
-                _holdingsGrid->SetColLabelValue(3, "Shares");
-                _holdingsGrid->SetColLabelValue(4, "Current Price");
-                _holdingsGrid->SetColLabelValue(5, "Gain/Loss");
-                _holdingsGrid->SetColLabelValue(6, "Total Value");
+                _holdingsGrid->SetColLabelValue(2, "Exchange");                
+                _holdingsGrid->SetColLabelValue(3, "Current Price");
+                _holdingsGrid->SetColLabelValue(4, "Gain/Loss");
                 _holdingsGrid->EnableEditing(false);
                 _holdingsGrid->HideRowLabels();
                 _holdingsGrid->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
@@ -204,9 +193,6 @@ namespace spt::application::ux {
                 
                 if (dialog.ShowModal() == wxID_OK) {
                     _portfolio = move(dialog.getPortfolio());                      
-                    for (auto& ticker : _portfolio->tickers()) {
-                        _portfolio->buyShares(ticker, 1);
-                    }
                     _splitter->Show();
                     _mainPanel->Layout();
                     _mainPanel->Refresh();
@@ -220,31 +206,28 @@ namespace spt::application::ux {
             void updatePortfolioDisplay() {
                 if (!_portfolio.has_value()) return;
                 
-                _capitalText->SetLabel(wxString::Format("Available Capital: $%.2f", _portfolio->capital().value()));                
                 if (_holdingsGrid->GetNumberRows() > 0) {
                     _holdingsGrid->DeleteRows(0, _holdingsGrid->GetNumberRows());
                 }
                 
-                for (const auto& company : _portfolio->companies()) {
+                for (const auto& ticker : _portfolio->tickers()) {
+                    const auto& company = _portfolio->getCompany(ticker);
                     _holdingsGrid->AppendRows(1);
                     int row = _holdingsGrid->GetNumberRows() - 1;
                     
                     _holdingsGrid->SetCellValue(row, 0, wxString(company.ticker().symbol()));
                     _holdingsGrid->SetCellValue(row, 1, wxString(company.getName()));
-                    _holdingsGrid->SetCellValue(row, 2, wxString(company.getExchange()));
-                    _holdingsGrid->SetCellValue(row, 3, wxString::Format("%d", company.shareCount()));
+                    _holdingsGrid->SetCellValue(row, 2, wxString(company.getExchange()));                    
+                    _holdingsGrid->SetCellValue(row, 3, wxString::Format("$%.2f", company.currentPrice().amount().value()));
                     
-                    if (!company.currentPrice().amount().isZero()) {
-                        _holdingsGrid->SetCellValue(row, 4, wxString::Format("$%.2f", company.currentPrice().amount().value()));
-                        double totalValue = company.currentPrice().amount().value() * company.shareCount();
-                        _holdingsGrid->SetCellValue(row, 6, wxString::Format("$%.2f", totalValue));
+                    auto delta = company.delta();
+                    if (delta.has_value()) {
+                        _holdingsGrid->SetCellValue(row, 4, wxString::Format("$%.2f", delta.value().amount().value()));
                     } else {
-                        _holdingsGrid->SetCellValue(row, 4, "$0.00");
-                        _holdingsGrid->SetCellValue(row, 6, "$0.00");
-                    }                    
-                    _holdingsGrid->SetCellValue(row, 5, "0.00%");
+                        _holdingsGrid->SetCellValue(row, 4, wxString("N/A"));
+                    }
                     
-                    for (int col = 0; col < 7; col++) {
+                    for (int col = 0; col < 5; col++) {
                         _holdingsGrid->SetReadOnly(row, col);
                     }
                 }
@@ -280,13 +263,11 @@ namespace spt::application::ux {
                 
                 int gridWidth = _holdingsGrid->GetClientSize().GetWidth();
                 if (gridWidth > 100) {
-                    _holdingsGrid->SetColSize(0, static_cast<int>(gridWidth * 0.11)); // Symbol: 11%
-                    _holdingsGrid->SetColSize(1, static_cast<int>(gridWidth * 0.25)); // Company Name: 25%
-                    _holdingsGrid->SetColSize(2, static_cast<int>(gridWidth * 0.12)); // Exchange: 12%
-                    _holdingsGrid->SetColSize(3, static_cast<int>(gridWidth * 0.08)); // Shares: 8%
-                    _holdingsGrid->SetColSize(4, static_cast<int>(gridWidth * 0.15)); // Current Price: 15%
-                    _holdingsGrid->SetColSize(5, static_cast<int>(gridWidth * 0.12)); // Gain/Loss: 12%
-                    _holdingsGrid->SetColSize(6, static_cast<int>(gridWidth * 0.15)); // Total Value: 15%
+                    _holdingsGrid->SetColSize(0, static_cast<int>(gridWidth * 0.20)); 
+                    _holdingsGrid->SetColSize(1, static_cast<int>(gridWidth * 0.25)); 
+                    _holdingsGrid->SetColSize(2, static_cast<int>(gridWidth * 0.15)); 
+                    _holdingsGrid->SetColSize(3, static_cast<int>(gridWidth * 0.15)); 
+                    _holdingsGrid->SetColSize(4, static_cast<int>(gridWidth * 0.25)); 
                 }
             }
             
@@ -328,7 +309,7 @@ namespace spt::application::ux {
                 int marginLeft = 60;
                 int marginRight = 20;
                 int marginTop = 20;
-                int marginBottom = 140; // Increased to make room for timestamps and legend
+                int marginBottom = 140; 
                 
                 int chartWidth = width - marginLeft - marginRight;
                 int chartHeight = height - marginTop - marginBottom;
@@ -376,11 +357,12 @@ namespace spt::application::ux {
                 int maxDataPoints = 0;
                 
                 size_t companyIdx = 0;
-                for (const auto& company : _portfolio->companies()) {
-                    if (companyIdx >= colors.size()) break; // Limit to available colors
+                for (const auto& ticker : _portfolio->tickers()) {
+                    const auto& company = _portfolio->getCompany(ticker);
+                    if (companyIdx >= colors.size()) break; // limit to available colors
                     
                     auto history = company.priceHistory();
-                    if (history.empty()) continue; // Skip companies with no price data
+                    if (history.empty()) continue; // skip companies with no price data
                     
                     companyNames.push_back(company.getName());
                     
@@ -443,7 +425,7 @@ namespace spt::application::ux {
                     }
                 }
                 
-                // Draw legend with price ranges below the chart in 3 columns
+                // draw legend with price ranges below the chart in 3 columns
                 dc.SetFont(wxFont(9, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
                 int legendStartY = marginTop + chartHeight + 35;
                 int columnWidth = chartWidth / 3;
@@ -452,7 +434,7 @@ namespace spt::application::ux {
                     int column = i / 5; // 5 items per column
                     int row = i % 5;
                     
-                    if (column >= 3) break; // Max 3 columns (15 items)
+                    if (column >= 3) break; // max 3 columns (15 items)
                     
                     int legendX = marginLeft + (column * columnWidth);
                     int legendY = legendStartY + (row * 20);

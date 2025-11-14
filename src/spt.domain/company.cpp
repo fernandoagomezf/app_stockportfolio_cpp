@@ -4,10 +4,13 @@ import std;
 import :ticker;
 import :transaction;
 import :pricepoint;
+import :pricedelta;
 
 namespace spt::domain::investments {
     using std::chrono::system_clock;
     using std::invalid_argument;
+    using std::nullopt;
+    using std::optional;
     using std::plus;
     using std::ranges::fold_left;
     using std::ranges::reverse;
@@ -19,6 +22,7 @@ namespace spt::domain::investments {
     using spt::domain::investments::Ticker;
     using spt::domain::investments::Transaction;
     using spt::domain::investments::PricePoint;
+    using spt::domain::investments::PriceDelta;
 
     export class Company final {
         private:
@@ -140,46 +144,19 @@ namespace spt::domain::investments {
                 return history;
             }
 
-            int sharesBought() const {
-                auto bought = _transactions
-                    | filter([](const auto& tx) { return tx.isBuying(); })
-                    | transform([](const auto& tx) { return tx.getShares(); });
-                auto result = fold_left(bought, 0, plus<>{});
-                return result;
-            }
+            optional<PriceDelta> delta() const {
+                optional<PriceDelta> result { nullopt };
 
-            int sharesSold() const {
-                auto sold = _transactions
-                    | filter([](const auto& tx) { return tx.isSelling(); })
-                    | transform([](const auto& tx) { return tx.getShares(); });
-                auto result = fold_left(sold, 0, plus<>{});
-                return result;
-            }
+                if (_pricePoints.size() >= 2) {
+                    PricePoint after = _pricePoints.top();
+                    stack<PricePoint> temp = _pricePoints;
+                    temp.pop();
+                    PricePoint before = temp.top();
 
-            int shareCount() const {
-                auto total = _transactions
-                    | transform([] (const auto& tx) { return tx.isBuying() ? tx.getShares() : -tx.getShares(); });
-                auto result = fold_left(total, 0, plus<>{});
-                return result;
-            }
-
-            void buyShares(int shares) {
-                if (shares <= 0) {
-                    throw invalid_argument { "Number of shares to buy must be positive." };
+                    result = PriceDelta { before, after };
                 }
 
-                _transactions.emplace_back(TransactionType::Buy, shares, currentPrice());
-            }
-
-            void sellShares(int shares) {
-                if (shares <= 0) {
-                    throw invalid_argument { "Number of shares to sell must be positive." };
-                }
-                if (shares > shareCount()) {
-                    throw invalid_argument { "Cannot sell more shares than currently owned." };
-                }
-
-                _transactions.emplace_back(TransactionType::Sell, shares, currentPrice());
+                return result;
             }
     };
 }

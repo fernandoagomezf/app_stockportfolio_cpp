@@ -13,6 +13,8 @@ namespace spt::infrastructure::services {
     using std::chrono::seconds;
     using std::chrono::system_clock;
     using std::format;
+    using std::get;
+    using std::make_tuple;
     using std::string;
     using std::views::filter;
     using std::views::transform;
@@ -88,10 +90,10 @@ namespace spt::infrastructure::services {
                     | transform([&latestTimestamp](const auto& pair) {
                         const auto& [ts, price] = pair;
                         auto timestamp = system_clock::from_time_t(static_cast<time_t>(ts.getNumber()));
-                        return std::make_tuple(timestamp, price.getNumber(), timestamp > latestTimestamp);
+                        return make_tuple(timestamp, price.getNumber(), timestamp > latestTimestamp);
                     })
                     | filter([](const auto& tuple) {
-                        return std::get<2>(tuple); // only new timestamps
+                        return get<2>(tuple); // only new timestamps
                     });
                 
                 for (const auto& [timestamp, priceValue, _] : priceData) {

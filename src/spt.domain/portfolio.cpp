@@ -21,18 +21,12 @@ namespace spt::domain::investments {
 
     export class Portfolio final {
         private:
-            Money _capital { 0.0 };
             map<Ticker, Company> _companies;
 
         public:
             Portfolio()
-                : _capital { 0.0 },
-                  _companies { }
+                : _companies { }
             {
-            }
-
-            auto companies() const {
-                return _companies | values;
             }
 
             auto tickers() const {
@@ -86,44 +80,7 @@ namespace spt::domain::investments {
 
                 return _companies.at(ticker);
             }
-
-            Money capital() const {
-                return _capital;
-            }
-
-            void capitalize(Money amount) {
-                if (!amount.isPositive()) {
-                    throw invalid_argument {
-                        "Capital amount must be positive"
-                    };
-                }
-                _capital += amount;
-            }
-
-            void buyShares(Ticker ticker, int shares) {
-                if (shares <= 0) {
-                    throw invalid_argument { "Number of shares to buy must be positive." };
-                }
-
-                Company& company { track(ticker) };
-                Price price { company.priceFor(shares) };
-                Money cost { price.amount() };
-                if (cost > _capital) {
-                    throw invalid_argument { "Insufficient capital to complete purchase." };
-                }
-
-                company.buyShares(shares);
-            }
-
-            void sellShares(Ticker ticker, int shares) {
-                if (shares <= 0) {
-                    throw invalid_argument { "Number of shares to sell must be positive." };
-                }
-
-                Company& company { track(ticker) };
-                company.sellShares(shares);
-            }
-
+            
             void updatePrice(Ticker ticker, Price newPrice) {
                 Company& company { track(ticker) };
                 company.updatePrice(newPrice);

@@ -26,6 +26,7 @@ add_executable(spt WIN32
     src/spt.domain/money.cpp
     src/spt.domain/price.cpp
     src/spt.domain/pricepoint.cpp
+    src/spt.domain/pricedelta.cpp
     src/spt.domain/transaction.cpp
     src/spt.domain/company.cpp
     src/spt.domain/companysearch.cpp

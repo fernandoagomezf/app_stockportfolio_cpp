@@ -13,7 +13,7 @@ namespace spt::domain::investments {
             PricePoint _after;
 
         public:
-            explicit PriceDelta(PricePoint before, PricePoint after)
+            PriceDelta(PricePoint before, PricePoint after)
                 : _before { before },
                   _after { after }
             {
@@ -30,8 +30,8 @@ namespace spt::domain::investments {
                 return _after;
             }
 
-            Money priceDelta() const {
-                return _after.price() - _before.price();
+            Money amount() const {
+                return _after.price().amount() - _before.price().amount();
             }
     };
 }

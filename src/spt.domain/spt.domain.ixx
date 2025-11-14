@@ -9,3 +9,4 @@ export import :company;
 export import :companysearch;
 export import :portfolio;
 export import :pricefetcher;
+export import :pricedelta;
