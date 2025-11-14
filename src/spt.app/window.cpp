@@ -89,12 +89,14 @@ namespace spt::application::ux {
                 wxBoxSizer* leftSizer = new wxBoxSizer(wxVERTICAL);
                 
                 _holdingsGrid = new wxGrid(_leftPanel, wxID_ANY);
-                _holdingsGrid->CreateGrid(0, 5);
+                _holdingsGrid->CreateGrid(0, 7);
                 _holdingsGrid->SetColLabelValue(0, "Symbol");
                 _holdingsGrid->SetColLabelValue(1, "Company Name");
                 _holdingsGrid->SetColLabelValue(2, "Exchange");                
                 _holdingsGrid->SetColLabelValue(3, "Current Price");
                 _holdingsGrid->SetColLabelValue(4, "Gain/Loss");
+                _holdingsGrid->SetColLabelValue(5, "Min Price");
+                _holdingsGrid->SetColLabelValue(6, "Max Price");
                 _holdingsGrid->EnableEditing(false);
                 _holdingsGrid->HideRowLabels();
                 _holdingsGrid->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
@@ -227,7 +229,21 @@ namespace spt::application::ux {
                         _holdingsGrid->SetCellValue(row, 4, wxString("N/A"));
                     }
                     
-                    for (int col = 0; col < 5; col++) {
+                    auto minPrice = company.minPrice();
+                    if (minPrice.has_value()) {
+                        _holdingsGrid->SetCellValue(row, 5, wxString::Format("$%.2f", minPrice.value().amount().value()));
+                    } else {
+                        _holdingsGrid->SetCellValue(row, 5, wxString("N/A"));
+                    }
+                    
+                    auto maxPrice = company.maxPrice();
+                    if (maxPrice.has_value()) {
+                        _holdingsGrid->SetCellValue(row, 6, wxString::Format("$%.2f", maxPrice.value().amount().value()));
+                    } else {
+                        _holdingsGrid->SetCellValue(row, 6, wxString("N/A"));
+                    }
+                    
+                    for (int col = 0; col < 7; col++) {
                         _holdingsGrid->SetReadOnly(row, col);
                     }
                 }
@@ -263,11 +279,13 @@ namespace spt::application::ux {
                 
                 int gridWidth = _holdingsGrid->GetClientSize().GetWidth();
                 if (gridWidth > 100) {
-                    _holdingsGrid->SetColSize(0, static_cast<int>(gridWidth * 0.20)); 
-                    _holdingsGrid->SetColSize(1, static_cast<int>(gridWidth * 0.25)); 
-                    _holdingsGrid->SetColSize(2, static_cast<int>(gridWidth * 0.15)); 
-                    _holdingsGrid->SetColSize(3, static_cast<int>(gridWidth * 0.15)); 
-                    _holdingsGrid->SetColSize(4, static_cast<int>(gridWidth * 0.25)); 
+                    _holdingsGrid->SetColSize(0, static_cast<int>(gridWidth * 0.10)); // symbol
+                    _holdingsGrid->SetColSize(1, static_cast<int>(gridWidth * 0.25)); // company name
+                    _holdingsGrid->SetColSize(2, static_cast<int>(gridWidth * 0.12)); // exchange
+                    _holdingsGrid->SetColSize(3, static_cast<int>(gridWidth * 0.13)); // current price
+                    _holdingsGrid->SetColSize(4, static_cast<int>(gridWidth * 0.13)); // gain/loss
+                    _holdingsGrid->SetColSize(5, static_cast<int>(gridWidth * 0.13)); // min price
+                    _holdingsGrid->SetColSize(6, static_cast<int>(gridWidth * 0.14)); // max price
                 }
             }
             

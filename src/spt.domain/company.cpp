@@ -148,15 +148,50 @@ namespace spt::domain::investments {
                 optional<PriceDelta> result { nullopt };
 
                 if (_pricePoints.size() >= 2) {
-                    PricePoint after = _pricePoints.top();
+                    PricePoint after = _pricePoints.top();  
+                    
                     stack<PricePoint> temp = _pricePoints;
-                    temp.pop();
+                    while (temp.size() > 1) {
+                        temp.pop();
+                    }
                     PricePoint before = temp.top();
 
                     result = PriceDelta { before, after };
                 }
 
                 return result;
+            }
+
+            optional<Price> minPrice() const {
+                if (_pricePoints.empty()) return nullopt;
+
+                stack<PricePoint> temp = _pricePoints;
+                Price minVal = temp.top().price();
+
+                while (!temp.empty()) {
+                    if (temp.top().price().amount().value() < minVal.amount().value()) {
+                        minVal = temp.top().price();
+                    }
+                    temp.pop();
+                }
+
+                return minVal;
+            }
+
+            optional<Price> maxPrice() const {
+                if (_pricePoints.empty()) return nullopt;
+
+                stack<PricePoint> temp = _pricePoints;
+                Price maxVal = temp.top().price();
+
+                while (!temp.empty()) {
+                    if (temp.top().price().amount().value() > maxVal.amount().value()) {
+                        maxVal = temp.top().price();
+                    }
+                    temp.pop();
+                }
+
+                return maxVal;
             }
     };
 }
